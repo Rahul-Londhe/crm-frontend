@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f1f5f9;
+}
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family: Arial, sans-serif;
+  background:#f1f5f9;
+  overflow-x:hidden;
+}
+
+button{
+  cursor:pointer;
+}
+
+input,
+textarea,
+select{
+  outline:none;
+}
+
+/* MOBILE FIX */
+
+@media(max-width:768px){
+
+  .hide-mobile{
+    display:none !important;
+  }
+
+}
+
+/* DESKTOP FIX */
+
+@media(min-width:769px){
+
+  .hide-desktop{
+    display:none !important;
+  }
+
+}
