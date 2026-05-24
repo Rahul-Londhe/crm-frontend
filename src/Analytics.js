@@ -15,7 +15,7 @@ import {
   Legend
 } from "recharts";
 
-import API from "../api/api";
+import API from "./api/api";
 
 function Analytics() {
   const [sourceData, setSourceData] = useState([]);
