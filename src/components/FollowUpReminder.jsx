@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-
-const API = "http://localhost:5000/api";
+import API from "./api/api";
 
 function FollowUpReminder() {
 
@@ -9,24 +7,15 @@ function FollowUpReminder() {
   const [show, setShow] = useState(true);
 
   const fetchPending = async () => {
+
     try {
 
-      const token =
-        localStorage.getItem("token");
-
-      const res = await axios.get(
-        `${API}/leads`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
+      const res = await API.get("/leads");
 
       if (res.data.success) {
 
         const overdue =
-          res.data.leads.filter(l => {
+          res.data.leads.filter((l) => {
 
             if (!l.nextFollowUp)
               return false;
@@ -43,8 +32,11 @@ function FollowUpReminder() {
       }
 
     } catch (err) {
+
       console.log(err);
+
     }
+
   };
 
   useEffect(() => {
@@ -63,6 +55,7 @@ function FollowUpReminder() {
     return null;
 
   return (
+
     <div
       style={{
         position: "fixed",
@@ -90,6 +83,7 @@ function FollowUpReminder() {
           borderTopRightRadius: "12px"
         }}
       >
+
         <b>
           ⚠ Pending Follow Ups
         </b>
@@ -105,6 +99,7 @@ function FollowUpReminder() {
         >
           ✕
         </button>
+
       </div>
 
       <div
@@ -124,6 +119,7 @@ function FollowUpReminder() {
                 "1px solid #eee"
             }}
           >
+
             <b>{lead.name}</b>
 
             <p>
@@ -145,8 +141,11 @@ function FollowUpReminder() {
         ))}
 
       </div>
+
     </div>
+
   );
+
 }
 
 export default FollowUpReminder;

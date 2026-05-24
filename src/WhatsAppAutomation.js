@@ -42,7 +42,7 @@ function WhatsAppAutomation() {
 
       // ---------------- API CALL ----------------
       const res = await fetch(
-        "http://localhost:5000/send-whatsapp",
+        "https://crm-backend-production-eec9.up.railway.app/api/send-whatsapp",
         {
           method: "POST",
           headers: {

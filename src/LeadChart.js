@@ -9,7 +9,7 @@ import {
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const API = "http://localhost:5000/api";
+import API from "./api/api";
 
 function LeadChart() {
   const [stats, setStats] = useState({
@@ -21,24 +21,17 @@ function LeadChart() {
 
   const [loading, setLoading] = useState(true);
 
-  const getToken = () => {
-    const t = localStorage.getItem("token");
-    return t && t !== "undefined" && t !== "null" ? t : null;
-  };
+
 
   // ================= FETCH FROM LEADS =================
   const fetchStats = async () => {
     try {
       setLoading(true);
 
-      const token = getToken();
-      if (!token) return;
+      
+      const res = await API.get("/leads");
 
-      const res = await fetch(`${API}/leads`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      const data = await res.json();
+const data = res.data;
 
       if (data.success) {
         const leads = data.leads || [];
@@ -68,8 +61,16 @@ function LeadChart() {
   };
 
   useEffect(() => {
-    fetchStats();
-  }, []);
+
+  fetchStats();
+
+  const interval =
+    setInterval(fetchStats, 15000);
+
+  return () =>
+    clearInterval(interval);
+
+}, []);
 
   // ================= CHART DATA =================
   const chartData = {
@@ -93,8 +94,18 @@ function LeadChart() {
       }
     ]
   };
+const totalLeads =
+  stats.New +
+  stats.Contacted +
+  stats.Interested +
+  stats.Closed;
 
-  if (loading) return <h3>Loading Chart...</h3>;
+ if (loading)
+  return <h3>Loading Chart...</h3>;
+
+if (totalLeads === 0) {
+  return <h3>No Leads Found</h3>;
+}
 
   return (
     <div style={{

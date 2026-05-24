@@ -15,7 +15,7 @@ import {
   Legend
 } from "recharts";
 
-const API = "http://localhost:5000/api";
+import API from "../api/api";
 
 function Analytics() {
   const [sourceData, setSourceData] = useState([]);
@@ -24,44 +24,77 @@ function Analytics() {
   const [year, setYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
 
-  const token = localStorage.getItem("token");
+  
 
   // ================= SAFE FETCH =================
   const fetchData = useCallback(async () => {
-    if (!token) return;
-
     setLoading(true);
 
-    try {
-      const headers = { Authorization: `Bearer ${token}` };
+try {
 
-      // ✅ PARALLEL API CALLS (FAST + SAFE)
-      const [sourceRes, dailyRes, monthlyRes] = await Promise.all([
-        fetch(`${API}/analytics/source?year=${year}`, { headers }),
-        fetch(`${API}/analytics/daily?year=${year}`, { headers }),
-        fetch(`${API}/analytics/monthly?year=${year}`, { headers })
-      ]);
+  const [
+    sourceRes,
+    dailyRes,
+    monthlyRes
+  ] = await Promise.all([
 
-      // ===== SOURCE =====
-      const sourceJson = await sourceRes.json().catch(() => ({}));
-      setSourceData(sourceJson.data || []);
+    API.get(
+      `/analytics/source?year=${year}`
+    ),
 
-      // ===== DAILY =====
-      const dailyJson = await dailyRes.json().catch(() => ({}));
-      const dailyFormatted = (dailyJson.data || []).map(item => ({
-        date: `${item._id.day}/${item._id.month}`,
-        leads: item.count
-      }));
-      setDailyData(dailyFormatted);
+    API.get(
+      `/analytics/daily?year=${year}`
+    ),
 
-      // ===== MONTHLY =====
-      const monthlyJson = await monthlyRes.json().catch(() => ({}));
-      const monthlyFormatted = (monthlyJson.data || []).map(item => ({
-        month: `Month ${item._id.month}`,
-        leads: item.count
-      }));
-      setMonthlyData(monthlyFormatted);
+    API.get(
+      `/analytics/monthly?year=${year}`
+    )
 
+  ]);
+
+  // ===== SOURCE =====
+
+  setSourceData(
+    sourceRes.data.data || []
+  );
+
+  // ===== DAILY =====
+
+  const dailyFormatted =
+    (
+      dailyRes.data.data || []
+    ).map(item => ({
+
+      date:
+        `${item._id.day}/${item._id.month}`,
+
+      leads:
+        item.count
+
+    }));
+
+  setDailyData(
+    dailyFormatted
+  );
+
+  // ===== MONTHLY =====
+
+  const monthlyFormatted =
+    (
+      monthlyRes.data.data || []
+    ).map(item => ({
+
+      month:
+        `Month ${item._id.month}`,
+
+      leads:
+        item.count
+
+    }));
+
+  setMonthlyData(
+    monthlyFormatted
+  );
     } catch (err) {
       console.log("Analytics Error:", err);
     } finally {

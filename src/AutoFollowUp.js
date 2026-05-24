@@ -1,85 +1,86 @@
 import React, { useEffect, useState } from "react";
-
-const API = "http://localhost:5000/api";
+import API from "./api/api";
 
 function AutoFollowUp() {
 
   const [enabled, setEnabled] = useState(true);
 
-  // ✅ GET TOKEN FUNCTION
-  const getToken = () => {
-    const t = localStorage.getItem("token");
-    return t && t !== "undefined" && t !== "null" ? t : null;
-  };
-
   // ---------------- LOAD SETTINGS ----------------
   useEffect(() => {
+
     const loadSettings = async () => {
+
       try {
-        const token = getToken();
-        if (!token) return;
 
-        const res = await fetch(`${API}/settings`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const res = await API.get("/settings");
 
-        if (res.status === 401) {
-          localStorage.clear();
-          window.location.reload();
-          return;
-        }
-
-        const data = await res.json();
+        const data = res.data;
 
         if (data?.success && data.settings) {
-          setEnabled(data.settings.autoFollowupEnabled ?? true);
+          setEnabled(
+            data.settings.autoFollowupEnabled ?? true
+          );
         }
 
       } catch (err) {
+
         console.error("Settings Load Error:", err);
+
+        if (err?.response?.status === 401) {
+          localStorage.clear();
+          window.location.reload();
+        }
+
       }
+
     };
 
     loadSettings();
+
   }, []);
 
   // ---------------- TOGGLE ----------------
   const toggle = async () => {
+
     const newState = !enabled;
+
     setEnabled(newState);
 
     try {
-      const token = getToken();
-      if (!token) return;
 
-      await fetch(`${API}/settings`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ autoFollowupEnabled: newState })
+      await API.put("/settings", {
+        autoFollowupEnabled: newState
       });
 
     } catch (err) {
+
       console.error("Toggle Error:", err);
+
     }
+
   };
 
   return (
+
     <div style={{
       background: "#e0f2fe",
       padding: "10px",
       borderRadius: "8px"
     }}>
+
       <b>AI Auto Follow-up:</b>
-      <button onClick={toggle} style={{ marginLeft: "10px" }}>
+
+      <button
+        onClick={toggle}
+        style={{ marginLeft: "10px" }}
+      >
         {enabled ? "ON" : "OFF"}
       </button>
+
     </div>
+
   );
+
 }
 
 export default AutoFollowUp;

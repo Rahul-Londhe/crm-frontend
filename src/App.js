@@ -3,7 +3,6 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import Leads from "./Leads";
 import Login from "./Login";
 import Register from "./Register";
-import Navbar from "./Navbar";
 import Automation from "./Automation";
 import AIChat from "./AIChat";
 import Layout from "./Layout";
@@ -55,11 +54,13 @@ import MobileTopBar from "./components/MobileTopBar";
 import MobileSidebar from "./components/MobileSidebar";
 import PWAInstallButton from "./components/PWAInstallButton";
 import NotificationBell from "./components/NotificationBell";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import { io } from "socket.io-client";
-const API = "http://localhost:5000/api";
-const socket = io("http://localhost:5000", {
-  transports: ["websocket"]
+import API from "./api/api";
+const socket = io(import.meta.env.VITE_API_URL, {
+  transports: ["websocket"],
+  autoConnect: true,
+  reconnection: true
 });
 function App() {
   const [user, setUser] = useState(null);
@@ -119,36 +120,38 @@ const socketRef = useRef(null);
 
   // ================= FETCH LEADS =================
   const fetchLeads = useCallback(async () => {
-    if (!token) return;
 
-    setLoading(true);
+  if (!token) return;
 
-    try {
-      const res = await fetch(`${API}/leads`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+  setLoading(true);
 
-      if (res.status === 401) {
-        logout();
-        return;
-      }
+  try {
 
-      const data = await res.json();
+    const res = await API.get("/leads");
 
-      if (data?.success) {
-        setLeads(data.leads || []);
-      } else {
-        setLeads([]);
-      }
-
-    } catch (err) {
-      console.error("Fetch Leads Error:", err);
+    if (res.data?.success) {
+      setLeads(res.data.leads || []);
+    } else {
       setLeads([]);
-    } finally {
-      setLoading(false);
     }
-  }, [token, logout]);
 
+  } catch (err) {
+
+    console.error("Fetch Leads Error:", err);
+
+    if (err?.response?.status === 401) {
+      logout();
+    }
+
+    setLeads([]);
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+}, [token, logout]);
   useEffect(() => {
     if (token) fetchLeads();
   }, [token, fetchLeads]);
@@ -189,10 +192,12 @@ useEffect(() => {
   });
 
   return () => {
+
   socketRef.current.off("taskCreated");
   socketRef.current.off("taskUpdated");
   socketRef.current.off("taskDeleted");
   socketRef.current.off("activity");
+
 };
 
 }, [user, fetchLeads]);

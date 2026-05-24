@@ -12,9 +12,9 @@ import {
   FaTasks,
   FaFileInvoiceDollar
 } from "react-icons/fa";
-import axios from "axios";
+import API from "./api/api";
 
-const API = process.env.REACT_APP_API || "http://localhost:5000/api";
+
 
 function Navbar({ setPage, currentPage, logout }) {
   const [pendingTasks, setPendingTasks] = useState(0);
@@ -40,14 +40,7 @@ function Navbar({ setPage, currentPage, logout }) {
   }, []);
 
   // ================= TOKEN =================
-  const getToken = () => {
-    try {
-      const t = localStorage.getItem("token");
-      return t && t !== "undefined" && t !== "null" ? t : null;
-    } catch {
-      return null;
-    }
-  };
+  
 
   // ================= LOAD TASKS =================
   const loadTasks = useCallback(async () => {
@@ -55,9 +48,7 @@ function Navbar({ setPage, currentPage, logout }) {
       const token = getToken();
       if (!token) return setPendingTasks(0);
 
-      const res = await axios.get(`${API}/tasks`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await API.get("/tasks");
 
       if (res?.data?.success) {
         const pending = (res.data.tasks || []).filter(

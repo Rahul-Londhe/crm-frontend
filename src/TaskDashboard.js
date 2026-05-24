@@ -1,18 +1,23 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import axios from "axios";
+import API from "./api/api";
 import { io } from "socket.io-client"; 
-const socket = io("http://localhost:5000");
-const API = process.env.REACT_APP_API || "http://localhost:5000/api";
+const socket = io(
+  process.env.REACT_APP_SOCKET_URL || "https://crm-backend-production-eec9.up.railway.app/api"
+);
+
 
 function TaskDashboard() {
   const [tasks, setTasks] = useState([]);
   const [leads, setLeads] = useState([]);
   const [users, setUsers] = useState([]); // ✅ NEW
   const [loading, setLoading] = useState(false);
+  const [creating, setCreating] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
 
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
@@ -50,13 +55,17 @@ function TaskDashboard() {
   axios.get(`${API}/users`, { headers }) // ✅ NEW
 ]);
 
-setTasks(taskRes.data?.tasks || []);
+setTasks(
+  (taskRes.data?.tasks || []).sort(
+    (a, b) =>
+      new Date(b.createdAt) -
+      new Date(a.createdAt)
+  )
+);
+
 setLeads(leadRes.data?.leads || []);
-setUsers(userRes.data?.users || []); // ✅ NEW
 
-      setTasks(taskRes.data?.tasks || []);
-      setLeads(leadRes.data?.leads || []);
-
+setUsers(userRes.data?.users || []);
     } catch {
       setError("Failed to load tasks");
     } finally {
@@ -67,6 +76,26 @@ setUsers(userRes.data?.users || []); // ✅ NEW
   useEffect(() => {
     loadData();
   }, [loadData]);
+  useEffect(() => {
+  if (error) {
+
+    const t = setTimeout(() => {
+      setError("");
+    }, 3000);
+
+    return () => clearTimeout(t);
+  }
+}, [error]);
+useEffect(() => {
+  if (success) {
+
+    const t = setTimeout(() => {
+      setSuccess("");
+    }, 3000);
+
+    return () => clearTimeout(t);
+  }
+}, [success]);
 useEffect(() => {
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user"));
@@ -79,27 +108,57 @@ useEffect(() => {
     setTasks(prev => [task, ...prev]);
   });
 
-  socket.on("taskUpdated", (updatedTask) => {
-    setTasks(prev =>
-      prev.map(t => t._id === updatedTask._id ? updatedTask : t)
-    );
-  });
+  
+    
+
+socket.on("taskUpdated", (updatedTask) => {
+  setTasks(prev =>
+    prev.map(t =>
+      t._id === updatedTask._id
+        ? updatedTask
+        : t
+    )
+  );
+});
+
+socket.on("taskDeleted", (taskId) => {
+  setTasks(prev =>
+    prev.filter(t => t._id !== taskId)
+  );
+});
 
   return () => {
     socket.off("taskCreated");
     socket.off("taskUpdated");
+    socket.off("taskDeleted");
   };
 }, []);
   // ================= CREATE =================
   const createTask = async () => {
+    setCreating(true);
     try {
       const token = getToken();
 
-      if (!form.title) {
-        return setError("Title required");
-      }
+      if (!form.title.trim()) {
+  return setError("Title required");
+}
+
+if (form.title.trim().length < 3) {
+  return setError("Title too short");
+}
 
       const payload = { ...form };
+      if (form.dueDate) {
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const selected = new Date(form.dueDate);
+
+  if (selected < today) {
+    return setError("Due date cannot be past");
+  }
+}
 
 // ✅ FIX ASSIGNED USER
 if (payload.assignedTo) {
@@ -120,6 +179,7 @@ delete payload.assignedTo;
       });
 
       setTasks(prev => [res.data.task, ...prev]);
+      setSuccess("Task Created Successfully");
 
       setForm({
   title: "",
@@ -131,6 +191,7 @@ delete payload.assignedTo;
 });
 
       setShowForm(false);
+      setCreating(false);
 
     } catch (err) {
       console.error(err);
@@ -204,6 +265,11 @@ delete payload.assignedTo;
       </button>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
+      {success && (
+  <p style={{ color: "green" }}>
+    {success}
+  </p>
+)}
 
       {showForm && (
         <div style={styles.form}>
@@ -254,7 +320,12 @@ delete payload.assignedTo;
     </option>
   ))}
 </select>
-          <button onClick={createTask}>Create</button>
+          <button
+  onClick={createTask}
+  disabled={creating}
+>
+  {creating ? "Creating..." : "Create"}
+</button>
         </div>
       )}
 
@@ -265,7 +336,9 @@ delete payload.assignedTo;
       />
 
       {loading && <p>Loading...</p>}
-
+{filteredTasks.length === 0 && (
+  <p>No Tasks Found</p>
+)}
       {/* ✅ FIXED MAP */}
       {filteredTasks.map(task => (
         <div
@@ -334,6 +407,8 @@ const styles = {
   container: { padding: "20px" },
   search: { padding: "8px", margin: "10px 0" },
   card: (priority) => ({
+    cursor: "pointer",
+transition: "0.2s",
   borderLeft: `5px solid ${
     priority === "High" ? "red" :
     priority === "Medium" ? "orange" : "green"
@@ -341,7 +416,12 @@ const styles = {
   borderRadius: "8px",
   padding: "15px",
   margin: "10px 0",
-  background: "#fff"
+  background:
+  priority === "High"
+    ? "#ffe5e5"
+    : priority === "Medium"
+    ? "#fff4db"
+    : "#e8fff1",
 }),
   deleteBtn: { background: "red", color: "#fff" },
   addBtn: { marginBottom: "10px", padding: "10px", background: "green", color: "#fff" },
@@ -363,7 +443,8 @@ const styles = {
     background: "#fff",
     padding: "20px",
     borderRadius: "10px",
-    width: "320px"
+    width: "90%",
+maxWidth: "320px"
   }
 };
 

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 
-const API = "http://localhost:5000/api";
-
+import API from "./api/api";
 function TaskForm({ fetchTasks }) {
 
   const [form, setForm] = useState({
@@ -46,24 +44,35 @@ function TaskForm({ fetchTasks }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.title.trim()) {
-      return alert("Enter title");
-    }
+setLoading(true);
 
+    if (!form.title.trim()) {
+  setLoading(false);
+  return alert("Enter title");
+}
+
+if (form.title.trim().length < 3) {
+  setLoading(false);
+  return alert("Title too short");
+}
     setLoading(true);
 
     try {
       const token = getToken();
 
       if (!token) {
-        alert("Login again");
-        return;
-      }
+  alert("Login again");
+  setLoading(false);
+  return;
+}
 
       // ✅ VALIDATE LEAD ID
       const validLead =
         form.lead && form.lead.length === 24 ? form.lead : null;
-
+if (form.dueDate && new Date(form.dueDate) < new Date()) {
+  setLoading(false);
+  return alert("Past date not allowed");
+}
       const payload = {
         title: form.title,
         description: form.description,
@@ -80,9 +89,9 @@ function TaskForm({ fetchTasks }) {
       });
 
       if (res.data.success) {
-        alert("✅ Task Added");
-
-        fetchTasks?.();
+        alert("Task Added Successfully");
+fetchTasks?.();
+        
 
         // RESET FORM
         setForm({

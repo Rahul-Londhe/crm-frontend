@@ -1,8 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 
-const API = "http://localhost:5000/api";
-const socket = io("http://localhost:5000");
+import API from "./api/api";
+const socket = io(
+  (API.defaults.baseURL || "https://crm-backend-production-eec9.up.railway.app/api")
+    .replace("/api", "")
+);
 
 function NotificationPopup() {
 
@@ -39,19 +42,25 @@ function NotificationPopup() {
       const token = getToken();
       if (!token) return;
 
-      const res = await fetch(`${API}/leads`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await API.get(
+  "/leads",
+  {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+);
 
-      if (!res.ok) return;
+    
 
-      const data = await res.json();
-
-      if (data.success && Array.isArray(data.leads)) {
+      if (
+  res.data.success &&
+  Array.isArray(res.data.leads)
+) {
 
         const today = new Date().toDateString();
 
-        const filtered = data.leads.filter(l =>
+        const filtered = res.data.leads.filter(l =>
           l?.nextFollowUp &&
           new Date(l.nextFollowUp).toDateString() === today
         );
@@ -79,8 +88,10 @@ function NotificationPopup() {
 
   // ================= SOCKET REALTIME =================
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-
+    const user =
+  JSON.parse(
+    localStorage.getItem("user") || "{}"
+  );
     if (user?.companyId) {
       socket.emit("joinCompany", user.companyId);
     }

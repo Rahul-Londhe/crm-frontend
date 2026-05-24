@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
+import API from "../api/api";
 
-const API = "http://localhost:5000/api";
 
 function AdminPanel() {
 
   const [users, setUsers] = useState([]);
 
-  const token =
-    localStorage.getItem("token");
+  
 
   useEffect(() => {
 
@@ -20,20 +19,12 @@ function AdminPanel() {
 
     try {
 
-      const res = await fetch(
-        `${API}/users`,
-        {
-          headers: {
-            Authorization:
-              `Bearer ${token}`
-          }
-        }
-      );
+      const res =
+  await API.get("/users");
 
-      const data = await res.json();
-
-      setUsers(data.users || []);
-
+setUsers(
+  res.data.users || []
+);
     } catch (err) {
 
       console.log(err);
@@ -50,27 +41,10 @@ function AdminPanel() {
 
     try {
 
-      await fetch(
-        `${API}/users/${id}/role`,
-        {
-
-          method: "PUT",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-
-            Authorization:
-              `Bearer ${token}`
-          },
-
-          body: JSON.stringify({
-            role
-          })
-
-        }
-      );
-
+      await API.put(
+  `/users/${id}/role`,
+  { role }
+);
       fetchUsers();
 
     } catch (err) {

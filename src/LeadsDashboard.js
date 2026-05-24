@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import StatusFilter from "./components/StatusFilter";
 
-const API = "http://localhost:5000/api";
+import API from "./api/api";
 
 function LeadsDashboard() {
   const [leads, setLeads] = useState([]);
@@ -9,27 +9,15 @@ function LeadsDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const getToken = () => {
-    const t = localStorage.getItem("token");
-    return t && t !== "undefined" && t !== "null" ? t : null;
-  };
+  
 
   // ================= FETCH =================
   const fetchLeads = useCallback(async () => {
     try {
-      const token = getToken();
+      const res =
+  await API.get("/leads");
 
-      if (!token) {
-        setError("Login required");
-        setLoading(false);
-        return;
-      }
-
-      const res = await fetch(`${API}/leads`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      const data = await res.json();
+const data = res.data;
 
       if (data.success) {
         setLeads(data.leads || []);
@@ -39,6 +27,10 @@ function LeadsDashboard() {
 
     } catch (err) {
       console.error("Dashboard Fetch Error:", err);
+      if (err?.response?.status === 401) {
+  localStorage.clear();
+  window.location.reload();
+}
       setError("Failed to load dashboard");
     } finally {
       setLoading(false);
@@ -52,7 +44,8 @@ function LeadsDashboard() {
 
   // ================= AUTO REFRESH =================
   useEffect(() => {
-    const interval = setInterval(fetchLeads, 5000);
+    const interval =
+  setInterval(fetchLeads, 15000);
     return () => clearInterval(interval);
   }, [fetchLeads]);
 
@@ -72,7 +65,11 @@ function LeadsDashboard() {
     leads.forEach((l) => {
       if (l.status === "Closed") {
         closed++;
-        revenue += Number(l.value) || 0;
+       revenue +=
+  Math.max(
+    Number(l.value) || 0,
+    0
+  );
       }
     });
 
@@ -95,7 +92,11 @@ const pendingFollowUps =
     <div style={box}>
       <h2>📊 Leads Dashboard</h2>
 
-      <button onClick={fetchLeads} style={refreshBtn}>
+      <button
+  onClick={fetchLeads}
+  style={refreshBtn}
+  disabled={loading}
+>
         🔄 Refresh
       </button>
 
@@ -105,7 +106,9 @@ const pendingFollowUps =
         filterStatus={filterStatus}
         setFilterStatus={setFilterStatus}
       />
-
+{stats.total === 0 && (
+  <p>No Leads Available</p>
+)}
       <div style={grid}>
         <Card title="Total Leads" value={stats.total} color="#3b82f6" />
         <Card title="Closed Deals" value={stats.closed} color="#10b981" />

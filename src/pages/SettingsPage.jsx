@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../api/api";
 
-const API = "http://localhost:5000/api";
+
 
 function SettingsPage() {
 
@@ -10,7 +10,7 @@ function SettingsPage() {
     department: ""
   });
 
-  const token = localStorage.getItem("token");
+
 
   useEffect(() => {
     fetchSettings();
@@ -20,16 +20,12 @@ function SettingsPage() {
 
     try {
 
-      const res = await axios.get(
-        `${API}/settings`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
+      const res =
+  await API.get("/settings");
 
-      setSettings(res.data.settings);
+setSettings(
+  res.data.settings
+);
 
     } catch (err) {
       console.log(err);
@@ -41,16 +37,10 @@ function SettingsPage() {
 
     try {
 
-      await axios.put(
-        `${API}/settings`,
-        settings,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
+      await API.put(
+  "/settings",
+  settings
+);
       alert("Settings Saved");
 
     } catch (err) {

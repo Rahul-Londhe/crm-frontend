@@ -1,29 +1,23 @@
 import React, { useEffect, useState } from "react";
+import API from "../api/api";
 
-const API = "http://localhost:5000/api";
 
 function ActivityPage() {
 
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const getToken = () => {
-    const t = localStorage.getItem("token");
-    return t && t !== "undefined" && t !== "null" ? t : null;
-  };
+
 
   const loadLogs = async () => {
     try {
-      const token = getToken();
-      if (!token) return;
-
       setLoading(true);
 
-      const res = await fetch(`${API}/activity`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+const res =
+  await API.get("/activity");
 
-      const data = await res.json();
+const data =
+  res.data;
 
       if (data.success) {
         setLogs(data.logs);

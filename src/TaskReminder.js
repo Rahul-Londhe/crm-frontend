@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 
-const API = "http://localhost:5000/api";
+import API from "./api/api";
 
 function TaskReminder() {
 
@@ -20,16 +20,13 @@ function TaskReminder() {
       const token = getToken();
       if (!token) return;
 
-      const res = await fetch(`${API}/tasks`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await API.get("/tasks", {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+});
 
-      if (!res.ok) {
-        console.log("Tasks API failed");
-        return;
-      }
-
-      const data = await res.json();
+const data = res.data;
 
       if (data.success && Array.isArray(data.tasks)) {
         setTasks(data.tasks);

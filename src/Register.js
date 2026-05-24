@@ -1,21 +1,25 @@
 import React, { useState } from "react";
 
-const API = process.env.REACT_APP_API || "http://localhost:5000/api";
+import API from "./api/api";
 
 function Register({ setShowRegister }) {
   const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    companyName: "",
-  });
+  name: "",
+  email: "",
+  phone: "",
+  password: "",
+  confirmPassword: "",
+  companyName: "",
+  businessType: "",
+  logo: null,
+  agree: false,
+});
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
+const [fileKey, setFileKey] = useState(0);
   // ================= INPUT =================
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -24,6 +28,8 @@ function Register({ setShowRegister }) {
   // ================= VALIDATION =================
   const validate = () => {
     if (
+      !form.businessType.trim()
+|| !form.phone.trim() ||
       !form.name.trim() ||
       !form.email.trim() ||
       !form.password.trim() ||
@@ -32,11 +38,33 @@ function Register({ setShowRegister }) {
       setError("All fields are required");
       return false;
     }
+if (!form.agree) {
 
-    if (form.password.length < 6) {
-      setError("Password must be at least 6 characters");
-      return false;
-    }
+  setError("Please accept Terms");
+
+  return false;
+
+}
+const phonePattern = /^[0-9]{10}$/;
+
+if (!phonePattern.test(form.phone)) {
+
+  setError("Mobile number must be 10 digits");
+
+  return false;
+
+}
+    const strongPassword =
+  /^(?=.*[A-Z])(?=.*[0-9]).{6,}$/;
+
+if (!strongPassword.test(form.password)) {
+
+  setError(
+    "Password must contain 1 Capital Letter and 1 Number"
+  );
+
+  return false;
+}
 
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match");
@@ -54,68 +82,119 @@ function Register({ setShowRegister }) {
   };
 
   // ================= REGISTER =================
-  const register = async () => {
-    if (!validate() || loading) return;
+const register = async () => {
 
-    setLoading(true);
-    setError("");
-    setMessage("");
+  if (!validate() || loading) return;
 
-    try {
-      const res = await fetch(`${API}/auth/register`, {   // ✅ FIXED
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: form.name.trim(),
-          email: form.email.toLowerCase().trim(),
-          password: form.password.trim(),
-          companyName: form.companyName.trim(),
-        }),
-      });
+  setLoading(true);
+  setError("");
+  setMessage("");
 
-      // ✅ SAFE JSON PARSE (fix unexpected < error)
-      const text = await res.text();
-      let data;
+  try {
 
-      try {
-        data = JSON.parse(text);
-      } catch {
-        throw new Error("Server returned HTML instead of JSON");
-      }
+    // ✅ FORM DATA
+    const formData = new FormData();
 
-      if (!res.ok || !data.success) {
-        setError(data.message || "Registration failed");
-        return;
-      }
+    formData.append("name", form.name);
+    formData.append("email", form.email);
+    formData.append("phone", form.phone);
+    formData.append("password", form.password);
+    formData.append("companyName", form.companyName);
+    formData.append("businessType", form.businessType);
 
-      // ✅ SUCCESS
-localStorage.setItem("token", data.token);   // ⭐ IMPORTANT
-localStorage.setItem("user", JSON.stringify(data.user));
-
-setMessage("🎉 Company + Admin Created Successfully!");
-
-      setForm({
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-        companyName: "",
-      });
-
-      setTimeout(() => {
-        setShowRegister(false);
-      }, 1200);
-
-    } catch (err) {
-      console.error("Register Error:", err);
-      setError(err.message || "Server error. Please try again.");
-    } finally {
-      setLoading(false);
+    if (form.logo) {
+      formData.append("logo", form.logo);
     }
-  };
 
+    // ✅ API CALL
+    const res = await API.post(
+      "/auth/register",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    const data = res.data;
+
+    console.log("REGISTER RESPONSE:", data);
+
+    // ✅ EMAIL EXISTS
+    if (res.status === 409) {
+
+      setError("Email already exists");
+
+      return;
+    }
+
+    // ✅ FAILED
+    if (!data.success) {
+
+      setError(data.message || "Registration failed");
+
+      return;
+    }
+
+    // ✅ SAVE LOGIN
+    localStorage.setItem("token", data.token);
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify(data.user)
+    );
+
+    // ✅ SUCCESS
+    setMessage(
+      "🎉 Company + Admin Created Successfully!"
+    );
+setFileKey(prev => prev + 1);
+    // ✅ RESET FORM
+    setForm({
+      name: "",
+      email: "",
+      phone: "",
+      password: "",
+      confirmPassword: "",
+      companyName: "",
+      businessType: "",
+      logo: null,
+      agree: false,
+    });
+
+    // ✅ CLOSE
+    setTimeout(() => {
+
+      setShowRegister(false);
+
+    }, 1200);
+
+  } catch (err) {
+
+    console.error("Register Error:", err);
+
+    // ✅ AXIOS ERROR
+    if (err.response?.status === 409) {
+
+      setError("Email already exists");
+
+    } else {
+
+      setError(
+        err.response?.data?.message ||
+        "Server error. Please try again."
+      );
+
+    }
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
   // ================= ENTER KEY =================
   const handleKey = (e) => {
     if (e.key === "Enter") register();
@@ -143,7 +222,13 @@ setMessage("🎉 Company + Admin Created Successfully!");
         onKeyDown={handleKey}
         style={styles.input}
       />
-
+<input
+  name="phone"
+  placeholder="Mobile Number"
+  value={form.phone}
+  onChange={handleChange}
+  style={styles.input}
+/>
       <input
         name="companyName"
         placeholder="Company Name"
@@ -152,7 +237,41 @@ setMessage("🎉 Company + Admin Created Successfully!");
         onKeyDown={handleKey}
         style={styles.input}
       />
+<select
+  name="businessType"
+  value={form.businessType}
+  onChange={handleChange}
+  style={styles.input}
+>
+  <option value="">Select Business Type</option>
 
+  <option>Real Estate</option>
+
+  <option>Education</option>
+
+  <option>Marketing</option>
+
+  <option>Hospital</option>
+
+  <option>Finance</option>
+
+  <option>Retail Shop</option>
+
+  <option>IT Company</option>
+
+</select>
+<input
+  key={fileKey}
+  type="file"
+  accept="image/*"
+  onChange={(e) =>
+    setForm({
+      ...form,
+      logo: e.target.files[0]
+    })
+  }
+  style={styles.input}
+/>
       <div style={{ position: "relative" }}>
         <input
           type={showPassword ? "text" : "password"}
@@ -180,13 +299,40 @@ setMessage("🎉 Company + Admin Created Successfully!");
         onKeyDown={handleKey}
         style={styles.input}
       />
+<label
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    marginBottom: "15px",
+    fontSize: "14px"
+  }}
+>
+  <input
+    type="checkbox"
+    checked={form.agree}
+    onChange={(e) =>
+      setForm({
+        ...form,
+        agree: e.target.checked
+      })
+    }
+  />
 
+  I agree to Terms & Conditions
+</label>
       <button
         onClick={register}
         style={loading ? styles.btnDisabled : styles.btn}
         disabled={loading}
       >
-        {loading ? "Creating..." : "Create Company"}
+        {loading ? (
+  <>
+    ⏳ Creating...
+  </>
+) : (
+  "Create Company"
+)}
       </button>
 
       {message && <p style={styles.success}>{message}</p>}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import API from "./api/api";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -12,7 +12,7 @@ import {
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
-const API = "http://localhost:5000/api";
+
 
 function DashboardCharts() {
 
@@ -42,9 +42,7 @@ function DashboardCharts() {
         setLoading(true);
 
         // 🔥 ONLY LEADS API (SAFE)
-        const res = await axios.get(`${API}/leads`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await API.get("/leads");
 
         const leads = res?.data?.leads || [];
 

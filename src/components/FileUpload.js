@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import axios from "axios"
+import API from "./api/api"
 
 function FileUpload() {
   const [file, setFile] = useState(null)
@@ -13,8 +13,7 @@ function FileUpload() {
     const formData = new FormData()
     formData.append("file", file)
 
-    const res = await axios.post("http://localhost:5000/api/upload", formData)
-
+    const res = await API.post("/upload", formData)
     setUploadedFile(res.data.file)
   }
 
@@ -29,7 +28,7 @@ function FileUpload() {
         <div>
           <p>Uploaded:</p>
           <a
-            href={`http://localhost:5000/uploads/${uploadedFile}`}
+            href={`https://crm-backend-production-eec9.up.railway.app/uploads/${uploadedFile}`}
             target="_blank"
             rel="noreferrer"
           >

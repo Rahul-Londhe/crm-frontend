@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
 
-const API = "http://localhost:5000/api";
+
+import API from "./api/api";
 
 function TaskAlertPopup() {
   const [tasks, setTasks] = useState([]);
@@ -32,15 +32,21 @@ function TaskAlertPopup() {
       const token = getToken();
       if (!token) return;
 
-      const res = await axios.get(`${API}/notifications`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await API.get(
+  "/notifications",
+  {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+);
 
       const newTasks = res.data?.tasks || [];
 
       // 🔥 NEW TASK DETECTION
       if (newTasks.length > prevCount.current) {
         playSound();
+        setShow(true);
       }
 
       prevCount.current = newTasks.length;
@@ -82,21 +88,50 @@ function TaskAlertPopup() {
   if (!show || tasks.length === 0) return null;
 
   return (
-    <div style={styles.popup}>
+    <div
+  style={styles.popup}
+  onClick={() => (window.location.href = "/tasks")}
+>
       <div style={styles.header}>
         <h4>⚠️ Task Alerts</h4>
-        <span onClick={() => setShow(false)} style={styles.closeX}>✖</span>
+        <span
+  onClick={(e) => {
+    e.stopPropagation();
+    setShow(false);
+  }}
+  style={styles.closeX}
+>✖</span>
       </div>
 
       <div style={styles.body}>
-        {tasks.slice(0, 5).map(t => (
-          <div key={t._id} style={styles.item}>
-            ⏰ {t.title}
-          </div>
-        ))}
+    {tasks.slice(0, 5).map((t) => (
+  <div key={t._id} style={styles.item}>
+
+    <strong>
+      📌 {t.title}
+    </strong>
+
+    <p
+      style={{
+        fontSize: "12px",
+        marginTop: "4px",
+        color: "#ccc",
+      }}
+    >
+      {t.description || "No description"}
+    </p>
+
+  </div>
+))}
       </div>
 
-      <button onClick={() => setShow(false)} style={styles.closeBtn}>
+      <button
+  onClick={(e) => {
+    e.stopPropagation();
+    setShow(false);
+  }}
+  style={styles.closeBtn}
+>
         Close
       </button>
     </div>

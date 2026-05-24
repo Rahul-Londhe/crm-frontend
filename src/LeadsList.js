@@ -9,7 +9,7 @@ import {
 } from "react-icons/fi";
 import { BsWhatsapp } from "react-icons/bs";
 
-const API = "http://localhost:5000/api";
+import API from "./api/api";
 
 function LeadsList({ leads = [], setLeads, onSelect, refreshLeads }) {
 
@@ -20,7 +20,8 @@ function LeadsList({ leads = [], setLeads, onSelect, refreshLeads }) {
   const [search, setSearch] = useState("");
 const [statusFilter, setStatusFilter] = useState("All");
 const [tempFilter, setTempFilter] = useState("All");
-
+const API_URL =
+  import.meta.env.VITE_API_URL;
   const safeSetLeads = (cb) => {
     if (typeof setLeads === "function") {
       setLeads(prev => cb(Array.isArray(prev) ? prev : []));
@@ -34,11 +35,9 @@ const [tempFilter, setTempFilter] = useState("All");
 
   // ================= USERS =================
   useEffect(() => {
-    fetch(`${API}/users`, {
-      headers: { Authorization: `Bearer ${getToken()}` }
-    })
-      .then(res => res.json())
-      .then(data => {
+    API.get("/users")
+  .then(res => {
+    const data = res.data;
         if (data?.success) setUsers(data.users || []);
       })
       .catch(err => console.error("Users Error:", err));
@@ -52,12 +51,9 @@ const [tempFilter, setTempFilter] = useState("All");
     setLoadingId(id);
 
     try {
-      const res = await fetch(`${API}/leads/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${getToken()}` }
-      });
-
-      const data = await res.json();
+      const res = await API.delete(`/leads/${id}`);
+const data = res.data;
+        
 
       if (data.success) {
         safeSetLeads(prev =>
@@ -91,197 +87,154 @@ window.dispatchEvent(
 
   // ================= STATUS =================
   const handleStatusChange = async (id, status) => {
-    safeSetLeads(prev =>
-      prev.map(l =>
-  (l._id || l.id) === id
-    ? { ...l, status }
-    : l
-)
+  safeSetLeads(prev =>
+    prev.map(l =>
+      (l._id || l.id) === id
+        ? { ...l, status }
+        : l
+    )
+  );
+
+  try {
+
+    const res = await API.put(
+      `/leads/${id}/status`,
+      { status }
     );
 
-    try {
-      const res = await fetch(`${API}/leads/${id}/status`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`
-        },
-        body: JSON.stringify({ status })
-      });
+    const data = res.data;
 
-      const data = await res.json();
+    if (data.success) {
 
-      if (data.success) {
-        safeSetLeads(prev =>
-          prev.map(l =>
-  (l._id || l.id) === id
-    ? data.lead
-    : l
-)
-        );
-      }
+      safeSetLeads(prev =>
+        prev.map(l =>
+          (l._id || l.id) === id
+            ? data.lead
+            : l
+        )
+      );
 
-    } catch (err) {
-      console.error(err);
     }
-  };
 
+  } catch (err) {
+    console.error(err);
+  }
+};
   // ================= ASSIGN =================
   const assignLead = async (id, userId) => {
-    const selectedUser = users.find(u => u._id === userId) || null;
 
-    safeSetLeads(prev =>
-  prev.map(l =>
-    (l._id || l.id) === id
-      ? { ...l, assignedTo: selectedUser }
-      : l
-  )
-);
+  const selectedUser =
+    users.find(u => u._id === userId) || null;
 
-    try {
-      const res = await fetch(`${API}/leads/${id}/assign`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`
-        },
-        body: JSON.stringify({ userId })
-      });
+  safeSetLeads(prev =>
+    prev.map(l =>
+      (l._id || l.id) === id
+        ? { ...l, assignedTo: selectedUser }
+        : l
+    )
+  );
 
-      const data = await res.json();
+  try {
 
-      if (data.success) {
-        safeSetLeads(prev =>
-          prev.map(l =>
-  (l._id || l.id) === id
-    ? data.lead
-    : l
-)
-        );
-      }
+    const res = await API.put(
+      `/leads/${id}/assign`,
+      { userId }
+    );
 
-    } catch (err) {
-      console.error(err);
+    const data = res.data;
+
+    if (data.success) {
+
+      safeSetLeads(prev =>
+        prev.map(l =>
+          (l._id || l.id) === id
+            ? data.lead
+            : l
+        )
+      );
+
     }
-  };
 
+  } catch (err) {
+    console.error(err);
+  }
+
+};
   // ================= EDIT =================
-  const startEdit = (lead) => {
-    setEditId(lead._id || lead.id);
-    setEditData({
-      name: lead.name || "",
-      phone: lead.phone || "",
-      email: lead.email || ""
-    });
-  };
-
-  const cancelEdit = () => {
-    setEditId(null);
-    setEditData({});
-  };
-
   const saveEdit = async () => {
-    try {
-      const res = await fetch(`${API}/leads/${editId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`
-        },
-        body: JSON.stringify(editData)
-      });
 
-      const data = await res.json();
+  try {
 
-      if (data.success) {
-        window.dispatchEvent(
-  new Event("crm-notification")
-);
+    const res = await API.put(
+      `/leads/${editId}`,
+      editData
+    );
 
-window.dispatchEvent(
-  new CustomEvent(
-    "crm-popup",
-    {
-      detail: "Lead Updated Successfully"
+    const data = res.data;
+
+    if (data.success) {
+
+      window.dispatchEvent(
+        new Event("crm-notification")
+      );
+
+      window.dispatchEvent(
+        new CustomEvent(
+          "crm-popup",
+          {
+            detail:
+              "Lead Updated Successfully"
+          }
+        )
+      );
+
+      safeSetLeads(prev =>
+        prev.map(l =>
+          (l._id || l.id) === editId
+            ? data.lead
+            : l
+        )
+      );
+
+      setEditId(null);
+
+      refreshLeads?.();
+
     }
-  )
-);
-        safeSetLeads(prev =>
-          prev.map(l =>
-  (l._id || l.id) === editId
-    ? data.lead
-    : l
-)
-        );
-        setEditId(null);
-        refreshLeads?.();
-      }
 
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  } catch (err) {
+    console.error(err);
+  }
 
+};
   // ================= ACTIONS =================
   const sendWhatsApp = async (lead) => {
 
   if (!lead?.phone) {
-
     alert("No phone number");
-
     return;
-
   }
 
   try {
 
-    const res = await fetch(
-      `${API}/whatsapp/send-message`,
+    const res = await API.post(
+      "/whatsapp/send-message",
       {
-
-        method: "POST",
-
-        headers: {
-
-          "Content-Type":
-            "application/json",
-
-          Authorization:
-            `Bearer ${getToken()}`
-
-        },
-
-        body: JSON.stringify({
-
-          phone: lead.phone,
-
-          message:
-            "Hello from CRM"
-
-        })
-
+        phone: lead.phone,
+        message: "Hello from CRM"
       }
     );
 
-    const data =
-      await res.json();
-
-    // ✅ SUCCESS
+    const data = res.data;
 
     if (data.success) {
 
-      alert(
-        "✅ WhatsApp Sent"
-      );
+      alert("✅ WhatsApp Sent");
 
-      // 🔔 SOUND
       window.dispatchEvent(
-        new Event(
-          "crm-notification"
-        )
+        new Event("crm-notification")
       );
 
-      // 🔥 POPUP
       window.dispatchEvent(
         new CustomEvent(
           "crm-popup",
@@ -323,39 +276,18 @@ window.dispatchEvent(
 
   try {
 
-    const res = await fetch(
-      `${API}/email/send`,
-      {
+   const res = await API.post(
+  "/email/send",
+  {
+    email: lead.email,
+    subject: "Hello from CRM",
+    message: "This is a test message from your CRM system"
+  }
+);
 
-        method: "POST",
-
-        headers: {
-
-          "Content-Type":
-            "application/json",
-
-          Authorization:
-            `Bearer ${getToken()}`
-
-        },
-
-        body: JSON.stringify({
-
-          email: lead.email,
-
-          subject:
-            "Hello from CRM",
-
-          message:
-            "This is a test message from your CRM system"
-
-        })
-
-      }
-    );
-
-    const data =
-      await res.json();
+const data = res.data;
+  
+      
 
     // ✅ SUCCESS
 
@@ -404,15 +336,20 @@ window.dispatchEvent(
 };
 
   const previewFile = (file) => {
-  const token = localStorage.getItem("token");
-  window.open(`${API}/leads/file/${file}?token=${token}`, "_blank");
+  const token =
+    localStorage.getItem("token");
+
+  window.open(
+    `${API_URL}/leads/file/${file}?token=${token}`,
+    "_blank"
+  );
 };
 
   const downloadFile = (file) => {
   const token = localStorage.getItem("token");
 
   const link = document.createElement("a");
-  link.href = `${API}/leads/file/${file}/download?token=${token}`;
+  link.href = `${API_URL}/leads/file/${file}/download?token=${token}`;
   link.setAttribute("download", file);
 
   document.body.appendChild(link);

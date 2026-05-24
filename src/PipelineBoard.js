@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import LeadDetailsModal from "./LeadDetailsModal";
 
-const API = process.env.REACT_APP_API || "http://localhost:5000/api";
+import API from "./api/api";
 
 const columns = ["New", "Contacted", "Interested", "Closed"];
 
@@ -34,11 +34,12 @@ function PipelineBoard() {
         return;
       }
 
-      const res = await fetch(`${API}/leads`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const data = await res.json();
+      const res = await API.get("/leads", {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
+      const data = res.data;
 
       if (data?.success && Array.isArray(data.leads)) {
         const fixed = data.leads.map((l) => ({
@@ -95,25 +96,28 @@ function PipelineBoard() {
     );
 
     try {
-      const token = getToken();
+  const token = getToken();
 
-      await fetch(`${API}/leads/${leadId}/status`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
-    } catch (err) {
-      console.error("Drag Error:", err.message);
-
-      // ❌ rollback if failed
-      setLeads(oldLeads);
-      alert("Failed to update status");
+  await API.put(
+    `/leads/${leadId}/status`,
+    { status: newStatus },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
-  };
+  );
 
+} catch (err) {
+  console.error("Drag Error:", err.message);
+
+  // ❌ rollback if failed
+  setLeads(oldLeads);
+
+  alert("Failed to update status");
+}
+
+};
   // ================= FORMAT =================
   const formatCurrency = (num) =>
     new Intl.NumberFormat("en-IN").format(num || 0);

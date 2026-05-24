@@ -4,10 +4,8 @@ import React,
   useState
 } from "react";
 
-import axios from "axios";
+import API from "./api/api";
 
-const API =
-"http://localhost:5000/api";
 
 function MeetingCalendar() {
 
@@ -38,9 +36,7 @@ function MeetingCalendar() {
       setLoading(true);
 
       const res =
-        await axios.get(
-          `${API}/meetings`
-        );
+        await API.get("/meetings");
 
       setMeetings(
         res.data.meetings || []
@@ -94,8 +90,8 @@ function MeetingCalendar() {
 
     try {
 
-      await axios.post(
-        `${API}/meetings`,
+      await API.post(
+  "/meetings",
         {
           ...form,
           status: "Scheduled"
@@ -165,8 +161,8 @@ function MeetingCalendar() {
 
     try {
 
-      await axios.put(
-        `${API}/meetings/${id}`,
+      await API.put(
+  `/meetings/${id}`,
         {
           title: newTitle
         }
@@ -216,9 +212,10 @@ function MeetingCalendar() {
 
     try {
 
-      await axios.delete(
-        `${API}/meetings/${id}`
-      );
+      await API.delete(
+  `/meetings/${id}`
+);
+      
 
       window.dispatchEvent(
         new Event(

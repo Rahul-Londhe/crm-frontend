@@ -3,10 +3,7 @@ import React, {
   useState
 } from "react";
 
-import axios from "axios";
-
-const API =
-"http://localhost:5000/api";
+import API from "../api/api";
 
 function MeetingReminder() {
 
@@ -17,18 +14,20 @@ function MeetingReminder() {
 
     fetchMeetings();
 
-const interval =
-  setInterval(() => {
+    const interval =
+      setInterval(() => {
 
-    fetchMeetings();
-    checkReminder();
+        fetchMeetings();
+        checkReminder();
 
-  }, 60000);
+      }, 60000);
 
     return () =>
       clearInterval(interval);
 
-  }, []);
+  }, [meetings]);
+
+  // ================= FETCH =================
 
   const fetchMeetings =
     async () => {
@@ -36,9 +35,7 @@ const interval =
     try {
 
       const res =
-        await axios.get(
-          `${API}/meetings`
-        );
+        await API.get("/meetings");
 
       setMeetings(
         res.data.meetings || []
@@ -51,6 +48,8 @@ const interval =
     }
 
   };
+
+  // ================= REMINDER =================
 
   const checkReminder =
     () => {
@@ -79,12 +78,13 @@ const interval =
       ) {
 
         alert(
-  `⏰ Upcoming Meeting: ${m.title}`
-);
+          `⏰ Upcoming Meeting: ${m.title}`
+        );
 
-window.dispatchEvent(
-  new Event("crm-notification")
-);
+        window.dispatchEvent(
+          new Event("crm-notification")
+        );
+
       }
 
     });
@@ -95,5 +95,4 @@ window.dispatchEvent(
 
 }
 
-export default
-MeetingReminder;
+export default MeetingReminder;

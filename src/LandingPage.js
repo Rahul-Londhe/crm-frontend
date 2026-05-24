@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 
-const API = "http://localhost:5000"
+const API = "https://crm-backend-production-eec9.up.railway.app/api"
 
 function LandingPage() {
 

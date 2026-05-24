@@ -8,7 +8,7 @@ function ReminderPopup() {
   // ---------------- FETCH LEADS ----------------
   const fetchReminders = async () => {
     try {
-      const res = await fetch("http://localhost:5000/leads", {
+      const res = await fetch("https://crm-backend-production-eec9.up.railway.app/api/leads", {
         headers: { Authorization: `Bearer ${token}` }
       });
 

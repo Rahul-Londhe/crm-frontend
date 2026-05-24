@@ -3,22 +3,22 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer
 } from "recharts";
 
-const API = "http://localhost:5000/api";
+import API from "../api/api";
+
 
 function AnalyticsAdvanced() {
   const [data, setData] = useState([]);
-  const token = localStorage.getItem("token");
+  
 
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
-    const res = await fetch(`${API}/analytics/daily`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    const res =
+  await API.get("/analytics/daily");
 
-    const result = await res.json();
+const result = res.data;
 
     const formatted = (result.data || []).map(item => ({
       date: item._id.date,

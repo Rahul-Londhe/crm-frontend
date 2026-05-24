@@ -1,51 +1,68 @@
 import React, { useEffect, useState } from "react";
-import io from "socket.io-client";
-import axios from "axios";
 
-const API = "http://localhost:5000/api";
-const socket = io("http://localhost:5000");
+import io from "socket.io-client";
+
+import API from "../api/api";
+
+// ✅ SOCKET URL
+const socket = io(
+  "https://crm-backend-production-eec9.up.railway.app"
+);
 
 function NotificationBell() {
 
-  const [notifications, setNotifications] = useState([]);
-  const [show, setShow] = useState(false);
+  const [notifications, setNotifications] =
+    useState([]);
 
-  const token = localStorage.getItem("token");
+  const [show, setShow] =
+    useState(false);
 
   // ================= FETCH =================
-  const fetchNotifications = async () => {
+
+  const fetchNotifications =
+    async () => {
+
     try {
 
-      const res = await axios.get(
-        `${API}/notifications/all`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
+      const res =
+        await API.get(
+          "/notifications/all"
+        );
 
       if (res.data.success) {
+
         setNotifications(
           res.data.notifications || []
         );
+
       }
 
     } catch (err) {
+
       console.log(err);
+
     }
+
   };
 
   // ================= SOCKET =================
+
   useEffect(() => {
 
     fetchNotifications();
 
     const companyId =
-      localStorage.getItem("companyId");
+      localStorage.getItem(
+        "companyId"
+      );
 
     if (companyId) {
-      socket.emit("joinCompany", companyId);
+
+      socket.emit(
+        "joinCompany",
+        companyId
+      );
+
     }
 
     socket.on(
@@ -61,17 +78,26 @@ function NotificationBell() {
     );
 
     return () => {
+
       socket.off("notification");
+
     };
 
   }, []);
 
   return (
-    <div style={{ position: "relative" }}>
+
+    <div style={{
+      position: "relative"
+    }}>
 
       {/* BELL */}
+
       <button
-        onClick={() => setShow(!show)}
+        onClick={() =>
+          setShow(!show)
+        }
+
         style={{
           fontSize: "22px",
           border: "none",
@@ -79,9 +105,11 @@ function NotificationBell() {
           cursor: "pointer"
         }}
       >
+
         🔔
 
         {notifications.length > 0 && (
+
           <span
             style={{
               background: "red",
@@ -92,13 +120,19 @@ function NotificationBell() {
               marginLeft: "5px"
             }}
           >
+
             {notifications.length}
+
           </span>
+
         )}
+
       </button>
 
       {/* DROPDOWN */}
+
       {show && (
+
         <div
           style={{
             position: "absolute",
@@ -115,36 +149,52 @@ function NotificationBell() {
         >
 
           {notifications.length === 0 ? (
-            <p style={{ padding: "10px" }}>
+
+            <p style={{
+              padding: "10px"
+            }}>
               No Notifications
             </p>
+
           ) : (
+
             notifications.map((n, i) => (
+
               <div
                 key={i}
                 style={{
                   padding: "10px",
-                  borderBottom: "1px solid #eee"
+                  borderBottom:
+                    "1px solid #eee"
                 }}
               >
+
                 <b>{n.user}</b>
 
                 <p>{n.message}</p>
 
                 <small>
-                  {new Date(
-                    n.createdAt
-                  ).toLocaleString()}
+                  {
+                    new Date(
+                      n.createdAt
+                    ).toLocaleString()
+                  }
                 </small>
+
               </div>
+
             ))
+
           )}
 
         </div>
+
       )}
 
     </div>
+
   );
+
 }
 
 export default NotificationBell;

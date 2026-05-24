@@ -11,7 +11,7 @@ const sendEmail = async()=>{
 
 try{
 
-const res = await fetch("http://localhost:5000/send-email",{
+const res = await fetch("https://crm-backend-production-eec9.up.railway.app/api/send-email",{
 
 method:"POST",
 

@@ -1,37 +1,33 @@
 import React, { useEffect, useState } from "react";
 
-const API = "http://localhost:5000/api";
+import API from "./api/api";
 
 function LeadNotes({ leadId }) {
 
   const [notes, setNotes] = useState([]);
   const [text, setText] = useState("");
 
-  const token = localStorage.getItem("token");
+  const [loading, setLoading] = useState(false);
 
   // ================= LOAD NOTES =================
   const loadNotes = async () => {
 
     try {
+setLoading(true);
+      const res =
+  await API.get(
+    `/leads/${leadId}/notes`
+  );
 
-      const res = await fetch(
-        `${API}/leads/${leadId}/notes`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
-      const data = await res.json();
-
+const data = res.data;
       if (data.success) {
         setNotes(data.notes || []);
       }
-
-    } catch (err) {
-      console.log(err);
-    }
+} catch (err) {
+  console.log(err);
+} finally {
+  setLoading(false);
+}
 
   };
 
@@ -50,24 +46,15 @@ function LeadNotes({ leadId }) {
 
     try {
 
-      const res = await fetch(
-        `${API}/leads/${leadId}/notes`,
-        {
-          method: "POST",
+      const res =
+  await API.post(
+    `/leads/${leadId}/notes`,
+    {
+      note: text
+    }
+  );
 
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-
-          body: JSON.stringify({
-            note: text
-          })
-        }
-      );
-
-      const data = await res.json();
-
+const data = res.data;
       if (data.success) {
 
         setNotes(prev => [
@@ -95,6 +82,7 @@ function LeadNotes({ leadId }) {
     }}>
 
       <h3>Lead Notes</h3>
+      {loading && <p>Loading...</p>}
 
       <textarea
         value={text}
@@ -109,7 +97,8 @@ function LeadNotes({ leadId }) {
       />
 
       <button
-        onClick={addNote}
+  onClick={addNote}
+  disabled={!text.trim()}
         style={{
           marginTop: 10
         }}
@@ -120,7 +109,9 @@ function LeadNotes({ leadId }) {
       <div style={{
         marginTop: 20
       }}>
-
+{notes.length === 0 && (
+  <p>No Notes Found</p>
+)}
         {notes.map((n) => (
 
           <div

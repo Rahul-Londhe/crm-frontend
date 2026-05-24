@@ -2,17 +2,15 @@ import React, {
   useEffect,
   useState
 } from "react";
+import API from "../api/api";
 
-const API =
-  "http://localhost:5000/api";
 
 function PerformanceDashboard() {
 
   const [data, setData] =
     useState([]);
 
-  const token =
-    localStorage.getItem("token");
+  
 
   useEffect(() => {
 
@@ -25,18 +23,13 @@ function PerformanceDashboard() {
 
       try {
 
-        const res = await fetch(
-          `${API}/performance`,
-          {
-            headers: {
-              Authorization:
-                `Bearer ${token}`
-            }
-          }
-        );
+        const res =
+  await API.get(
+    "/performance"
+  );
 
-        const result =
-          await res.json();
+const result =
+  res.data;
 
         if (result.success) {
 

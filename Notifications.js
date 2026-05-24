@@ -12,7 +12,7 @@ function Notifications() {
     if (!token) return;
 
     try {
-      const res = await fetch("http://localhost:5000/notifications/today", {
+      const res = await fetch("https://crm-backend-production-eec9.up.railway.app/api/notifications/today", {
         headers: {
           Authorization: `Bearer ${token}`
         }

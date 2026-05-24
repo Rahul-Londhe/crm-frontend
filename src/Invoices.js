@@ -1,26 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
-import axios from "axios";
+import API from "./api/api";
 import AddInvoiceForm from "./components/AddInvoiceForm";
 import handlePayment from "./paymentHandler";
 
-const API_URL = process.env.REACT_APP_API || "http://localhost:5000/api";
 
-// ✅ AXIOS INSTANCE
-const api = axios.create({
-  baseURL: API_URL,
-  timeout: 10000
-});
-
-// ✅ TOKEN INTERCEPTOR
-api.interceptors.request.use((req) => {
-  const token = localStorage.getItem("token");
-
-  if (token && token !== "undefined" && token !== "null") {
-    req.headers.Authorization = `Bearer ${token}`;
-  }
-
-  return req;
-});
 
 function Invoices() {
   const [invoices, setInvoices] = useState([]);
@@ -39,7 +22,7 @@ function Invoices() {
       setLoading(true);
       setError("");
 
-      const res = await api.get("/invoices");
+      const res = await API.get("/invoices");
 
       const list = Array.isArray(res.data.invoices)
         ? res.data.invoices
@@ -93,7 +76,7 @@ function Invoices() {
   const handlePay = async (invoice) => {
     const total = Number(invoice.amount || 0);
     const paid = Number(invoice.paidAmount || 0);
-    const remaining = total - paid;
+    const remaining = Math.max(total - paid, 0);
 
     if (remaining <= 0) {
       alert("Already Paid");
@@ -141,7 +124,7 @@ const downloadPDF = async (id) => {
       return;
     }
 
-    const res = await axios.get(
+    const res = await API.get(
       `${API_URL}/invoices/${id}/pdf`,
       {
         responseType: "blob",
@@ -189,12 +172,12 @@ const downloadPDF = async (id) => {
       {invoices.map((inv) => {
         const total = Number(inv.amount || 0);
         const paid = Number(inv.paidAmount || 0);
-        const remaining = total - paid;
-
+        const remaining =
+  Math.max(total - paid, 0);
         const status = getStatus(total, paid);
 
         return (
-          <div key={inv.id} style={styles.box}>
+          <div key={inv.id || inv._id} style={styles.box}>
             <h3>{inv?.lead?.name || "No Lead"}</h3>
 
             <p>Email: {inv?.lead?.email || "-"}</p>
@@ -210,16 +193,25 @@ const downloadPDF = async (id) => {
             {remaining > 0 && (
               <button
                 style={styles.payBtn}
-                disabled={payingId === inv.id}
+                disabled={
+  payingId ===
+  (inv.id || inv._id)
+}
                 onClick={() => handlePay(inv)}
               >
-                {payingId === inv.id ? "Processing..." : "Pay Now"}
+                {
+  payingId === (inv.id || inv._id)
+    ? "Processing..."
+    : "Pay Now"
+}
               </button>
             )}
 
             <button
               style={styles.pdfBtn}
-              onClick={() => downloadPDF(inv.id)}
+              onClick={() =>
+  downloadPDF(inv.id || inv._id)
+}
             >
               Download PDF
             </button>

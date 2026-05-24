@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from "react"
+import API from "../api/api";
 import socket from "../socket";
 
-const API = "http://localhost:5000/api";
+
 
 function LiveActivityFeed() {
   const [activities, setActivities] = useState([]);
 
-  const token = localStorage.getItem("token");
+  
 
   useEffect(() => {
     fetchActivities();
@@ -23,12 +23,7 @@ function LiveActivityFeed() {
 
   const fetchActivities = async () => {
     try {
-      const res = await axios.get(`${API}/activity`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
+      const res = await API.get("/activity");
       setActivities(res.data.logs || []);
     } catch (err) {
       console.log(err);

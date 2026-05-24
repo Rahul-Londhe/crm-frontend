@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const API = "http://localhost:5000/api";
+import API from "./api/api";
 
 function TaskPage() {
 
@@ -21,14 +21,22 @@ function TaskPage() {
   // ---------------- LOAD ----------------
   const fetchTasks = async () => {
     try {
-      const res = await fetch(`${API}/tasks`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await API.get("/tasks", {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+});
 
-      const data = await res.json();
+const data = res.data;
 
       if (data.success) {
-        setTasks(data.tasks || []);
+        setTasks(
+  (data.tasks || []).sort(
+    (a, b) =>
+      new Date(b.createdAt) -
+      new Date(a.createdAt)
+  )
+);
       }
 
     } catch (err) {
@@ -50,7 +58,15 @@ function TaskPage() {
 
   // ---------------- ADD ----------------
   const addTask = async () => {
-
+if (form.title.trim().length < 3) {
+  return alert("Title too short");
+}
+if (
+  form.dueDate &&
+  new Date(form.dueDate) < new Date()
+) {
+  return alert("Past date not allowed");
+}
     if (!form.title.trim()) {
       alert("Enter Task Title");
       return;
@@ -59,19 +75,22 @@ function TaskPage() {
     try {
       setLoading(true);
 
-      const res = await fetch(`${API}/tasks`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          ...form,
-          status: "Pending"
-        })
-      });
+     
+       const res = await API.post(
+  "/tasks",
+  {
+    ...form,
+    status: "Pending"
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+);
 
-      const data = await res.json();
+const data = res.data;
+      
 
       if (data.success) {
         setTasks(prev => [data.task, ...prev]);
@@ -101,12 +120,14 @@ function TaskPage() {
     if (!window.confirm("Delete this task?")) return;
 
     try {
-      const res = await fetch(`${API}/tasks/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await API.delete(`/tasks/${id}`, {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+});
 
-      const data = await res.json();
+const data = res.data;
+      
 
       if (data.success) {
         setTasks(prev => prev.filter(t => getId(t) !== id));
@@ -125,16 +146,17 @@ function TaskPage() {
     if (!id) return alert("Invalid ID");
 
     try {
-      const res = await fetch(`${API}/tasks/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ status })
-      });
+      const res = await API.put(
+  `/tasks/${id}`,
+  { status },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+);
 
-      const data = await res.json();
+const data = res.data;
 
       if (data.success) {
         setTasks(prev =>
@@ -203,7 +225,9 @@ function TaskPage() {
         </button>
 
       </div>
-
+{tasks.length === 0 && (
+  <p>No Tasks Found</p>
+)}
       {/* LIST */}
       {tasks.map(task => (
 

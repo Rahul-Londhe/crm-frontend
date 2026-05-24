@@ -4,7 +4,7 @@ function LeadDetailsModal({ lead, onClose }) {
   if (!lead) return null;
 
   const fileUrl = lead.file
-    ? `http://localhost:5000/uploads/${lead.file}`
+    ? `https://crm-backend-production-eec9.up.railway.app/api/uploads/${lead.file}`
     : null;
 
   return (

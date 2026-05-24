@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 
-const API = process.env.REACT_APP_API || "http://localhost:5000/api";
-
+import API from "./api/api";
 function Login({ setUser, setToken }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -47,7 +46,9 @@ function Login({ setUser, setToken }) {
           password: password.trim(),
         }),
       });
-
+if (!res.ok) {
+  throw new Error("Login failed");
+}
       const data = await res.json();
 
       console.log("LOGIN RESPONSE:", data);
@@ -64,8 +65,7 @@ console.log("TOKEN:", data.token); // ✅ ADD
         console.log("TOKEN SAVED:", data.token);
 
         // ✅ FORCE UI UPDATE (IMPORTANT)
-        window.location.reload();
-
+        
       } else {
         setError(data.message || "Login Failed");
       }
@@ -84,7 +84,11 @@ console.log("TOKEN:", data.token); // ✅ ADD
   };
 
   return (
+
+  <div style={styles.containerWrapper}>
+
     <div style={styles.container}>
+    
       <h2 style={styles.title}>CRM Login</h2>
 
       <input
@@ -121,20 +125,34 @@ console.log("TOKEN:", data.token); // ✅ ADD
       </button>
 
       {error && <p style={styles.error}>{error}</p>}
+
     </div>
-  );
+
+  </div>
+
+);
 }
 
 // ================= STYLES =================
 const styles = {
+  containerWrapper: {
+  minHeight: "100vh",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  background: "#f1f5f9",
+  padding: "20px",
+},
   container: {
-    width: "360px",
+    width: "100%",
+maxWidth: "360px",
     padding: "30px",
     borderRadius: "12px",
     background: "#fff",
     boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
     textAlign: "center",
   },
+  
   title: {
     marginBottom: "20px",
   },
@@ -175,6 +193,7 @@ const styles = {
     top: "12px",
     cursor: "pointer",
   },
+  
 };
 
 export default Login;

@@ -4,10 +4,9 @@ import React, {
 } from "react";
 
 import { io } from "socket.io-client";
+import API from "./api/api";
 
-const API = "http://localhost:5000/api";
-
-const socket = io("http://localhost:5000");
+const socket = io(API.defaults.baseURL.replace("/api", ""));
 
 function NotificationCenter() {
 
@@ -24,9 +23,9 @@ function NotificationCenter() {
     localStorage.getItem("token");
 
   const user =
-    JSON.parse(
-      localStorage.getItem("user")
-    );
+  JSON.parse(
+    localStorage.getItem("user") || "{}"
+  );
 
   // ================= FETCH NOTIFICATIONS =================
   const fetchNotifications =
@@ -34,38 +33,21 @@ function NotificationCenter() {
 
       try {
 
-        const res = await fetch(
-          `${API}/notifications/all`,
-          {
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-              "Content-Type":
-                "application/json"
-            }
-          }
-        );
-
+        const res = await API.get(
+  "/notifications/all"
+);
         // ✅ CHECK RESPONSE
-        if (!res.ok) {
-          console.log(
-            "Notification API Error"
-          );
-          return;
-        }
-
-        const data = await res.json();
+      
 
         console.log(
-          "NOTIFICATION RESPONSE:",
-          data
-        );
+  "NOTIFICATION RESPONSE:",
+  res.data
+);
 
-        if (data.success) {
-
+if (res.data.success) {
           setNotifications(
-            data.notifications || []
-          );
+  res.data.notifications || []
+);
 
         }
 
@@ -86,30 +68,18 @@ function NotificationCenter() {
 
       try {
 
-        const res = await fetch(
-          `${API}/notifications/unread-count`,
-          {
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-              "Content-Type":
-                "application/json"
-            }
-          }
-        );
+        const res = await API.get(
+  "/notifications/unread-count"
+);
+         
 
-        if (!res.ok) {
-          console.log(
-            "COUNT API ERROR"
-          );
-          return;
-        }
+        
 
-        const data = await res.json();
+        const data = res.data;
 
         console.log(
           "COUNT RESPONSE:",
-          data
+          res.data
         );
 
         if (data.success) {
@@ -135,26 +105,11 @@ function NotificationCenter() {
 
       try {
 
-        const res = await fetch(
-          `${API}/notifications/${id}/read`,
-          {
-            method: "PUT",
+        await API.put(
+  `/notifications/${id}/read`
+);
 
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-              "Content-Type":
-                "application/json"
-            }
-          }
-        );
-
-        if (!res.ok) {
-          console.log(
-            "MARK READ ERROR"
-          );
-          return;
-        }
+        
 
         fetchNotifications();
         fetchCount();

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
+import API from "../api/api";
 import { getInvoices } from "../api/invoiceApi";
 import AddPaymentModal from "./AddPaymentModal";
 
-const API = "http://localhost:5000/api";
 
 const InvoiceList = () => {
   const [invoices, setInvoices] = useState([]);
@@ -11,10 +11,7 @@ const InvoiceList = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const getToken = () => {
-    const t = localStorage.getItem("token");
-    return t && t !== "undefined" && t !== "null" ? t : null;
-  };
+  
 
   // ================= FETCH =================
   const fetchInvoices = async () => {
@@ -45,27 +42,33 @@ const InvoiceList = () => {
   }, []);
 
   // ================= PDF DOWNLOAD =================
-  const downloadPDF = (id) => {
-    const token = getToken();
+  const downloadPDF = async (id) => {
 
-    if (!token) {
-      alert("Please login again");
-      return;
-    }
+  try {
 
-    // 🔥 FIX: backend uses header auth, not query
-    fetch(`${API}/invoices/${id}/pdf`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.blob())
-      .then((blob) => {
-        const url = window.URL.createObjectURL(blob);
-        window.open(url);
-      })
-      .catch(() => alert("Failed to download PDF"));
-  };
+    const res = await API.get(
+      `/invoices/${id}/pdf`,
+      {
+        responseType: "blob"
+      }
+    );
+
+    const url =
+      window.URL.createObjectURL(
+        new Blob([res.data])
+      );
+
+    window.open(url);
+
+  } catch (err) {
+
+    console.log(err);
+
+    alert("Failed to download PDF");
+
+  }
+
+};
 
   // ================= STATUS COLOR =================
   const getStatusStyle = (status) => {
