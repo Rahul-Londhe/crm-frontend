@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import API from "../api/api";
-const API = "API";
+
 
 const AddInvoiceForm = ({ onSuccess }) => {
 
@@ -22,36 +22,41 @@ const AddInvoiceForm = ({ onSuccess }) => {
   };
 
   // ================= FETCH LEADS =================
-  useEffect(() => {
-    const fetchLeads = async () => {
-      try {
-        const res = await fetch(`${API}/leads`, {
-          headers: {
-            Authorization: `Bearer ${getToken()}`
-          }
-        });
+ useEffect(() => {
 
-        const data = await res.json();
+const fetchLeads = async () => {
+try {
 
-        console.log("FULL LEADS DATA:", data); // 🔥 DEBUG
+  const res = await API.get("/leads");
 
-       if (data && Array.isArray(data.leads)) {
-  setLeads(data.leads);
-} else if (Array.isArray(data)) {
-  setLeads(data);
-} else {
+  const data = res.data;
+
+  console.log("FULL LEADS DATA:", data);
+
+  if (data && Array.isArray(data.leads)) {
+    setLeads(data.leads);
+
+  } else if (Array.isArray(data)) {
+    setLeads(data);
+
+  } else {
+    setLeads([]);
+  }
+
+} catch (err) {
+
+  console.error("Lead Fetch Error:", err);
+
   setLeads([]);
+
 }
-        
 
-      } catch (err) {
-        console.error("Lead Fetch Error:", err);
-        setLeads([]);
-      }
-    };
 
-    fetchLeads();
-  }, []);
+};
+fetchLeads();
+
+}, []);
+
 
   // ================= SUBMIT =================
   const handleSubmit = async (e) => {
@@ -77,16 +82,9 @@ const AddInvoiceForm = ({ onSuccess }) => {
 
     console.log("FINAL PAYLOAD:", payload);
 
-    const res = await fetch(`${API}/invoices`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getToken()}`
-      },
-      body: JSON.stringify(payload)
-    });
+    const res = await API.post("/invoices", payload);
 
-    const data = await res.json();
+const data = res.data;
 
     if (data.success) {
       alert("Invoice Created ✅");
@@ -144,13 +142,12 @@ const AddInvoiceForm = ({ onSuccess }) => {
   <option value="">Select Lead</option>
 
   {leads.map((l) => (
-    <option key={l.id} value={l.id}>
+    <option key={l._id} value={l._id}>
       {l.name} ({l.phone})
     </option>
   ))}
 </select>
-console.log("LEADS FROM API:", leads);
-console.log("FINAL LEAD ID:", form.lead);
+
         {/* Amount */}
         <input
           type="number"
