@@ -1,7 +1,7 @@
 import axios from "axios";
 const BASE_URL =
   process.env.REACT_APP_API ||
-  "http://localhost:5000/api";
+  "https://easygoing-caring-production-de2f.up.railway.app/api";
 
 // ================= AXIOS INSTANCE =================
 const API = axios.create({
