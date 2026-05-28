@@ -3,8 +3,7 @@ import axios from "axios";
 // ================= BASE API =================
 
 const API = axios.create({
-baseURL:
-"https://crm-backend-production-eec9.up.railway.app/api",
+baseURL: `${process.env.REACT_APP_API}/api`,
 
 timeout: 15000,
 });

@@ -57,7 +57,7 @@ import NotificationBell from "./components/NotificationBell";
 
 import { io } from "socket.io-client";
 import API from "./api/api";
-const socket = io(import.meta.env.VITE_API_URL, {
+const socket = io(process.env.REACT_APP_API, {
   transports: ["websocket"],
   autoConnect: true,
   reconnection: true

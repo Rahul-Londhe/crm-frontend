@@ -41,7 +41,9 @@ function Navbar({ setPage, currentPage, logout }) {
 
   // ================= TOKEN =================
   
-
+const getToken = () => {
+  return localStorage.getItem("token");
+};
   // ================= LOAD TASKS =================
   const loadTasks = useCallback(async () => {
     try {
