@@ -3,11 +3,13 @@ import axios from "axios";
 // ================= BASE API =================
 
 const API = axios.create({
-baseURL: `${process.env.REACT_APP_API}/api`,
-
-timeout: 15000,
+  baseURL: `${process.env.REACT_APP_API}/api`,
+  timeout: 15000,
 });
-
+console.log(
+  "API URL:",
+  API.defaults.baseURL
+);
 // ================= TOKEN =================
 
 API.interceptors.request.use(

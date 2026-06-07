@@ -1,7 +1,8 @@
 import React, { useState } from "react"
 
-const API = "https://crm-backend-production-eec9.up.railway.app/api"
-
+const API_URL =
+  process.env.REACT_APP_API
+  || "https://crm-backend-production-579c.up.railway.app/api";
 function LandingPage() {
 
   const [form, setForm] = useState({
@@ -49,7 +50,8 @@ function LandingPage() {
         const fd = new FormData()
         fd.append("file", file)
 
-        const uploadRes = await fetch(`${API}/upload`, {
+        const uploadRes = await fetch(
+  `${API_URL}/upload`, {
           method: "POST",
           body: fd
         })
@@ -62,7 +64,8 @@ function LandingPage() {
       }
 
       // ✅ STEP 2: Save lead
-      const res = await fetch(`${API}/leads`, {
+      const res = await fetch(
+  `${API_URL}/leads`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

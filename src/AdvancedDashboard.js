@@ -1,24 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
+import API from "../api/api";
 
 function AdvancedDashboard() {
 
   const [leads, setLeads] = useState([]);
-  const token = localStorage.getItem("token");
+ 
 
   useEffect(() => {
     fetchLeads();
   }, []);
 
-  const fetchLeads = async () => {
-    const res = await fetch("https://crm-backend-production-eec9.up.railway.app/api/leads", {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+  
+    const res = await API.get("/leads");
 
-    const data = await res.json();
-    if (data.success) setLeads(data.leads);
-  };
-
+const data = res.data;
   // GROUP BY MONTH
   const months = Array(12).fill(0);
 

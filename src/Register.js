@@ -93,30 +93,19 @@ const register = async () => {
   try {
 
     // ✅ FORM DATA
-    const formData = new FormData();
-
-    formData.append("name", form.name);
-    formData.append("email", form.email);
-    formData.append("phone", form.phone);
-    formData.append("password", form.password);
-    formData.append("companyName", form.companyName);
-    formData.append("businessType", form.businessType);
-
-    if (form.logo) {
-      formData.append("logo", form.logo);
-    }
-
+    const payload = {
+  name: form.name,
+  email: form.email,
+  password: form.password,
+  phone: form.phone,
+  companyName: form.companyName,
+  businessType: form.businessType
+};
     // ✅ API CALL
     const res = await API.post(
-      "/auth/register",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-
+  "/auth/register",
+  payload
+);
     const data = res.data;
 
     console.log("REGISTER RESPONSE:", data);

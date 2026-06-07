@@ -1,4 +1,9 @@
-import React, { useState } from "react";
+import React, {
+  useState,
+  useEffect
+} from "react";
+import API from "../api/api";
+
 
 import {
   Calendar,
@@ -18,7 +23,40 @@ function MeetingCalendar() {
 
   const [events, setEvents] =
     useState([]);
+useEffect(() => {
+  console.log("MeetingCalendar Mounted");
+  fetchMeetings();
 
+  return () => {
+    console.log("MeetingCalendar Unmounted");
+  };
+}, []);
+
+const fetchMeetings = async () => {
+
+  try {
+
+    
+
+    const res = await API.get("/meetings");
+
+    const formatted =
+      res.data.meetings.map(m => ({
+        ...m,
+        id: m._id,
+        start: new Date(m.start),
+        end: new Date(m.end)
+      }));
+
+    setEvents(formatted);
+
+  } catch(err){
+
+    console.log(err);
+
+  }
+
+};
   const [showForm, setShowForm] =
     useState(false);
 
@@ -52,145 +90,101 @@ function MeetingCalendar() {
 
   // ================= ADD MEETING =================
 
-  const addMeeting = () => {
+const addMeeting = async () => {
 
-    if (
-      !form.title ||
-      !form.startTime ||
-      !form.endTime
-    ) {
-
-      alert(
-        "Please Fill Required Fields"
-      );
-
-      return;
-
-    }
-
-    // DATE
+  try {
 
     const date =
       moment(selectedSlot.start)
       .format("YYYY-MM-DD");
-
-    // START DATE TIME
 
     const start =
       new Date(
         `${date}T${form.startTime}`
       );
 
-    // END DATE TIME
-
     const end =
       new Date(
         `${date}T${form.endTime}`
       );
 
-    const newMeeting = {
+    await API.post("/meetings", {
+  title: form.title,
+  client: form.client,
+  notes: form.notes,
+  start,
+  end
+});
 
-      id: Date.now(),
-
-      title: form.title,
-
-      client: form.client,
-
-      notes: form.notes,
-
-      start,
-
-      end
-    };
-
-    setEvents([
-      ...events,
-      newMeeting
-    ]);
-
-    // RESET
-
-    setForm({
-      title: "",
-      client: "",
-      notes: "",
-      startTime: "",
-      endTime: ""
-    });
+    fetchMeetings();
 
     setShowForm(false);
 
-    alert("✅ Meeting Added");
+    setForm({
+      title:"",
+      client:"",
+      notes:"",
+      startTime:"",
+      endTime:""
+    });
 
-    // SOUND EVENT
+  } catch(err){
 
-    window.dispatchEvent(
-  new Event("crm-notification")
-);
+    console.log(err);
 
-  };
+  }
+
+};
 
   // ================= DELETE =================
 
-  const deleteMeeting =
-    (id) => {
+  const deleteMeeting = async (id) => {
 
-      const confirmDelete =
-        window.confirm(
-          "Delete this meeting?"
-        );
+  try {
 
-      if (!confirmDelete) return;
+    await API.delete(`/meetings/${id}`);
 
-      const updated =
-        events.filter(
-          (e) => e.id !== id
-        );
+    fetchMeetings();
 
-      setEvents(updated);
+  } catch(err){
 
-    };
+    console.log(err);
+
+  }
+
+};
 
   // ================= EDIT =================
 
-  const editMeeting =
-    (id) => {
+  const editMeeting = async (id) => {
 
-      const meeting =
-        events.find(
-          (e) => e.id === id
-        );
+  try {
 
-      const newTitle =
-        prompt(
-          "Edit Meeting Title",
-          meeting.title
-        );
+    const meeting =
+      events.find(
+        (e) => e.id === id
+      );
 
-      if (!newTitle) return;
+    const newTitle =
+      prompt(
+        "Edit Meeting Title",
+        meeting.title
+      );
 
-      const updated =
-        events.map((e) => {
+    if (!newTitle) return;
 
-          if (e.id === id) {
+    await API.put(`/meetings/${id}`, {
+  title: newTitle
+});
+    fetchMeetings();
 
-            return {
-              ...e,
-              title: newTitle
-            };
+  } catch(err){
 
-          }
+    console.log(err);
 
-          return e;
+  }
 
-        });
-
-      setEvents(updated);
-
-      alert("✅ Meeting Updated");
-
-    };
-
+};
   return (
 
     <div
@@ -213,6 +207,22 @@ function MeetingCalendar() {
       {/* ================= CALENDAR ================= */}
 
       <Calendar
+      onSelectEvent={(event)=>{
+
+  const action =
+    window.prompt(
+      "Type edit or delete"
+    );
+
+  if(action==="edit"){
+    editMeeting(event.id);
+  }
+
+  if(action==="delete"){
+    deleteMeeting(event.id);
+  }
+
+}}
         selectable
         popup
         localizer={localizer}

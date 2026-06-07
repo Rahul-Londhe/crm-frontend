@@ -1,12 +1,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import axios from "axios";
 import API from "./api/api";
-import { io } from "socket.io-client"; 
-const socket = io(
-  process.env.REACT_APP_SOCKET_URL || "https://crm-backend-production-eec9.up.railway.app/api"
-);
-
-
+import socket from "./socket";
 function TaskDashboard() {
   const [tasks, setTasks] = useState([]);
   const [leads, setLeads] = useState([]);
@@ -50,9 +45,9 @@ function TaskDashboard() {
       const headers = { Authorization: `Bearer ${token}` };
 
       const [taskRes, leadRes, userRes] = await Promise.all([
-  axios.get(`${API}/tasks`, { headers }),
-  axios.get(`${API}/leads`, { headers }),
-  axios.get(`${API}/users`, { headers }) // ✅ NEW
+  API.get("/tasks"),
+ API.get("/leads"),
+  API.get("/users") // ✅ NEW
 ]);
 
 setTasks(
@@ -174,9 +169,15 @@ delete payload.assignedTo;
         delete payload.dueDate;
       }
 
-      const res = await axios.post(`${API}/tasks`, payload, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+     const res = await API.post(
+  "/tasks",
+  payload,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+);
 
       setTasks(prev => [res.data.task, ...prev]);
       setSuccess("Task Created Successfully");
@@ -206,9 +207,14 @@ delete payload.assignedTo;
     try {
       const token = getToken();
 
-      await axios.delete(`${API}/tasks/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await API.delete(
+  `/tasks/${id}`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+);
 
       setTasks(prev => prev.filter(t => t._id !== id));
 
@@ -222,10 +228,15 @@ delete payload.assignedTo;
     try {
       const token = getToken();
 
-      await axios.put(`${API}/tasks/${id}`, { status }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
+      await API.put(
+  `/tasks/${id}`,
+  { status },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+);
       setTasks(prev =>
         prev.map(t => t._id === id ? { ...t, status } : t)
       );

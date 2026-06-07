@@ -45,7 +45,7 @@ const data = res.data;
   // ================= AUTO REFRESH =================
   useEffect(() => {
     const interval =
-  setInterval(fetchLeads, 15000);
+  setInterval(fetchLeads, 60000);
     return () => clearInterval(interval);
   }, [fetchLeads]);
 

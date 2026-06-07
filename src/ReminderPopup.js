@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from "react";
 
 function ReminderPopup() {
-
+  
+const API_URL =
+  process.env.REACT_APP_API ||
+  "https://crm-backend-production-579c.up.railway.app/api";
   const [reminders, setReminders] = useState([]);
   const token = localStorage.getItem("token");
 
   // ---------------- FETCH LEADS ----------------
   const fetchReminders = async () => {
     try {
-      const res = await fetch("https://crm-backend-production-eec9.up.railway.app/api/leads", {
+      const res = await fetch(
+  `${API_URL}/leads`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

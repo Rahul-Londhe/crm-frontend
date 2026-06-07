@@ -1,11 +1,15 @@
 import { io } from "socket.io-client";
 
-const socket = io(
-  "https://crm-backend-production-579c.up.railway.app",
-  {
-    transports: ["websocket", "polling"],
-    withCredentials: true,
-  }
-);
+const SOCKET_URL =
+  process.env.REACT_APP_SOCKET_URL;
+console.log("Socket URL:", SOCKET_URL);
+
+const socket = io(SOCKET_URL, {
+  transports: ["websocket"],
+  withCredentials: true,
+  reconnection: true,
+  reconnectionAttempts: 10,
+  reconnectionDelay: 2000
+});
 
 export default socket;

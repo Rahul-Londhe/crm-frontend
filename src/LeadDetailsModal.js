@@ -2,10 +2,13 @@ import React from "react";
 import LeadNotes from "./LeadNotes";
 function LeadDetailsModal({ lead, onClose }) {
   if (!lead) return null;
+const API_URL =
+  process.env.REACT_APP_API ||
+  "https://crm-backend-production-579c.up.railway.app";
 
-  const fileUrl = lead.file
-    ? `https://crm-backend-production-eec9.up.railway.app/api/uploads/${lead.file}`
-    : null;
+const fileUrl = lead.file
+  ? `${API_URL}/uploads/${lead.file}`
+  : null;
 
   return (
     <div className="modal-overlay">
@@ -99,7 +102,7 @@ function LeadDetailsModal({ lead, onClose }) {
             )}
           </div>
 {/* LEAD NOTES COMPONENT */}
-<LeadNotes leadId={lead.id} />
+<LeadNotes leadId={lead._id} />
           {/* ACTIVITIES */}
           <div className="info-card">
             <h3>📊 Activity History</h3>

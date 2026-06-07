@@ -3,8 +3,11 @@ import { io } from "socket.io-client";
 
 import API from "./api/api";
 const socket = io(
-  (API.defaults.baseURL || "https://crm-backend-production-eec9.up.railway.app/api")
-    .replace("/api", "")
+  "https://crm-backend-production-579c.up.railway.app",
+  {
+    transports: ["websocket"],
+    withCredentials: true
+  }
 );
 
 function NotificationPopup() {
@@ -82,16 +85,30 @@ function NotificationPopup() {
       }
 
     } catch (err) {
-      console.log("Notification Error:", err?.message);
+      if (
+  err?.response?.status !== 429
+) {
+
+  console.log(
+    "Notification Error:",
+    err
+  );
+
+}
     }
   };
 
   // ================= SOCKET REALTIME =================
   useEffect(() => {
-    const user =
-  JSON.parse(
+    let user = {};
+
+try {
+  user = JSON.parse(
     localStorage.getItem("user") || "{}"
   );
+} catch {
+  user = {};
+}
     if (user?.companyId) {
       socket.emit("joinCompany", user.companyId);
     }
@@ -115,7 +132,10 @@ function NotificationPopup() {
   useEffect(() => {
     loadAlerts();
 
-    const interval = setInterval(loadAlerts, 15000);
+    const interval = setInterval(
+  loadAlerts,
+  60000
+);
     return () => clearInterval(interval);
 
   }, []);

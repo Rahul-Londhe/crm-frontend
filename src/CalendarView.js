@@ -100,8 +100,9 @@ function CalendarView() {
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+
+  loadData();
+}, []);
 
   // ================= SORT =================
   const sortedEvents = useMemo(() => {

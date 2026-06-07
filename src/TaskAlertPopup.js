@@ -59,15 +59,30 @@ function TaskAlertPopup() {
       setTasks(uniqueTasks);
 
     } catch (err) {
-      console.log("Task Alert Error:", err.message);
-    }
-  };
+
+  if (
+    err?.response?.status !== 429
+  ) {
+
+    console.log(
+      "Task Alert Error:",
+      err
+    );
+
+  }
+
+}
+
+};
 
   // ================= INIT =================
   useEffect(() => {
     fetchAlerts();
 
-    intervalRef.current = setInterval(fetchAlerts, 30000); // 30 sec
+    intervalRef.current = setInterval(
+  fetchAlerts,
+  120000
+);
 
     return () => {
       clearInterval(intervalRef.current);

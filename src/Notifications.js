@@ -7,12 +7,18 @@ function Notifications() {
 
   const fetchNotifications = async () => {
     try {
-      const res = await fetch("https://crm-backend-production-eec9.up.railway.app/api/notifications/today", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
+      const API_URL =
+  process.env.REACT_APP_API ||
+  "https://crm-backend-production-579c.up.railway.app";
 
+const res = await fetch(
+  `${API_URL}/api/notifications/today`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+);
       const data = await res.json()
 
       if (data.success) {

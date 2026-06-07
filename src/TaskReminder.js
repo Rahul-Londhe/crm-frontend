@@ -57,8 +57,10 @@ const data = res.data;
 
         if (!shownAlerts.current.has(task._id)) {
           shownAlerts.current.add(task._id);
-
-          alert(`🔔 Task Due: ${task.title}`);
+console.log(
+  "🔔 Task Due:",
+  task.title
+);
         }
 
       }
@@ -67,8 +69,16 @@ const data = res.data;
 
   // ---------------- INITIAL LOAD ----------------
   useEffect(() => {
+
+  fetchTasks();
+
+  const interval = setInterval(() => {
     fetchTasks();
-  }, []);
+  }, 300000); // 5 min
+
+  return () => clearInterval(interval);
+
+}, []);
 
   // ---------------- INTERVAL ----------------
   useEffect(() => {

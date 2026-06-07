@@ -1,13 +1,10 @@
-import React, { useEffect, useState } from "react";
-
-import io from "socket.io-client";
+import React, {
+  useEffect,
+  useState
+} from "react";
 
 import API from "../api/api";
-
-// ✅ SOCKET URL
-const socket = io(
-  "https://crm-backend-production-eec9.up.railway.app"
-);
+import socket from "../socket";
 
 function NotificationBell() {
 
@@ -17,33 +14,38 @@ function NotificationBell() {
   const [show, setShow] =
     useState(false);
 
-  // ================= FETCH =================
+  // ================= FETCH NOTIFICATIONS =================
 
   const fetchNotifications =
     async () => {
 
-    try {
+      try {
 
-      const res =
-        await API.get(
-          "/notifications/all"
-        );
+        const res =
+          await API.get(
+            "/notifications/all"
+          );
 
-      if (res.data.success) {
+        if (
+          res.data?.success
+        ) {
 
-        setNotifications(
-          res.data.notifications || []
+          setNotifications(
+            res.data.notifications || []
+          );
+
+        }
+
+      } catch (err) {
+
+        console.error(
+          "Notification Error:",
+          err
         );
 
       }
 
-    } catch (err) {
-
-      console.log(err);
-
-    }
-
-  };
+    };
 
   // ================= SOCKET =================
 
@@ -51,35 +53,45 @@ function NotificationBell() {
 
     fetchNotifications();
 
-    const companyId =
-      localStorage.getItem(
-        "companyId"
+    const user =
+      JSON.parse(
+        localStorage.getItem(
+          "user"
+        ) || "{}"
       );
 
-    if (companyId) {
+    if (
+      user?.companyId
+    ) {
 
       socket.emit(
         "joinCompany",
-        companyId
+        user.companyId
       );
 
     }
+
+    // NEW NOTIFICATION
 
     socket.on(
       "notification",
       (data) => {
 
-        setNotifications(prev => [
-          data,
-          ...prev
-        ]);
+        setNotifications(
+          (prev) => [
+            data,
+            ...prev
+          ]
+        );
 
       }
     );
 
     return () => {
 
-      socket.off("notification");
+      socket.off(
+        "notification"
+      );
 
     };
 
@@ -87,41 +99,58 @@ function NotificationBell() {
 
   return (
 
-    <div style={{
-      position: "relative"
-    }}>
+    <div
+      style={{
+        position:
+          "relative"
+      }}
+    >
 
       {/* BELL */}
 
       <button
         onClick={() =>
-          setShow(!show)
+          setShow(
+            !show
+          )
         }
-
         style={{
-          fontSize: "22px",
-          border: "none",
-          background: "transparent",
-          cursor: "pointer"
+          fontSize:
+            "22px",
+          border:
+            "none",
+          background:
+            "transparent",
+          cursor:
+            "pointer"
         }}
       >
 
         🔔
 
-        {notifications.length > 0 && (
+        {notifications.length >
+          0 && (
 
           <span
             style={{
-              background: "red",
-              color: "#fff",
-              borderRadius: "50%",
-              padding: "2px 7px",
-              fontSize: "12px",
-              marginLeft: "5px"
+              background:
+                "red",
+              color:
+                "#fff",
+              borderRadius:
+                "50%",
+              padding:
+                "2px 7px",
+              fontSize:
+                "12px",
+              marginLeft:
+                "5px"
             }}
           >
 
-            {notifications.length}
+            {
+              notifications.length
+            }
 
           </span>
 
@@ -135,55 +164,77 @@ function NotificationBell() {
 
         <div
           style={{
-            position: "absolute",
+            position:
+              "absolute",
             right: 0,
             top: "40px",
-            width: "320px",
-            background: "#fff",
-            border: "1px solid #ddd",
-            borderRadius: "10px",
-            maxHeight: "400px",
-            overflowY: "auto",
-            zIndex: 999
+            width:
+              "320px",
+            background:
+              "#fff",
+            border:
+              "1px solid #ddd",
+            borderRadius:
+              "10px",
+            maxHeight:
+              "400px",
+            overflowY:
+              "auto",
+            zIndex: 9999,
+            boxShadow:
+              "0 4px 10px rgba(0,0,0,0.1)"
           }}
         >
 
-          {notifications.length === 0 ? (
+          {notifications.length ===
+          0 ? (
 
-            <p style={{
-              padding: "10px"
-            }}>
+            <p
+              style={{
+                padding:
+                  "10px"
+              }}
+            >
               No Notifications
             </p>
 
           ) : (
 
-            notifications.map((n, i) => (
+            notifications.map(
+              (
+                n,
+                i
+              ) => (
 
-              <div
-                key={i}
-                style={{
-                  padding: "10px",
-                  borderBottom:
-                    "1px solid #eee"
-                }}
-              >
+                <div
+                  key={i}
+                  style={{
+                    padding:
+                      "10px",
+                    borderBottom:
+                      "1px solid #eee"
+                  }}
+                >
 
-                <b>{n.user}</b>
+                  <b>
+                    {n.title ||
+                      "Notification"}
+                  </b>
 
-                <p>{n.message}</p>
+                  <p>
+                    {n.message}
+                  </p>
 
-                <small>
-                  {
-                    new Date(
+                  <small>
+                    {new Date(
                       n.createdAt
-                    ).toLocaleString()
-                  }
-                </small>
+                    ).toLocaleString()}
+                  </small>
 
-              </div>
+                </div>
 
-            ))
+              )
+            )
 
           )}
 

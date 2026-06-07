@@ -55,13 +55,9 @@ import MobileSidebar from "./components/MobileSidebar";
 import PWAInstallButton from "./components/PWAInstallButton";
 import NotificationBell from "./components/NotificationBell";
 
-import { io } from "socket.io-client";
+
 import API from "./api/api";
-const socket = io(process.env.REACT_APP_API, {
-  transports: ["websocket"],
-  autoConnect: true,
-  reconnection: true
-});
+import socket from "./socket";
 function App() {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
@@ -158,7 +154,7 @@ const socketRef = useRef(null);
 // ================= SOCKET =================
 useEffect(() => {
 
-  if (!user?.companyId) return;
+  if (!user?.companyId || !token) return;
 
   socketRef.current = socket;
 
@@ -368,7 +364,8 @@ case "activity":
 
       {/* ✅ USER PROFILE + LOGOUT */}
       <UserProfile user={user} logout={logout} />
-      <NotificationCenter />
+      
+      
 
       {showPopup && (
         <>

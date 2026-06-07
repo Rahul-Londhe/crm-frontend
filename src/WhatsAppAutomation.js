@@ -6,7 +6,9 @@ function WhatsAppAutomation() {
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
-
+const API_URL =
+  process.env.REACT_APP_API ||
+  "http://localhost:5000/api"
   const token = localStorage.getItem("token");
 
   // ---------------- SEND FUNCTION ----------------
@@ -42,20 +44,19 @@ function WhatsAppAutomation() {
 
       // ---------------- API CALL ----------------
       const res = await fetch(
-        "https://crm-backend-production-eec9.up.railway.app/api/send-whatsapp",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`   // ✅ FIX
-          },
-          body: JSON.stringify({
-            phone: cleanNumber,
-            message
-          })
-        }
-      );
-
+  `${API_URL}/send-whatsapp`,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      phone: cleanNumber,
+      message
+    })
+  }
+);
       const data = await res.json();
 
       if (res.ok && data.success) {

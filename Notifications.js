@@ -12,7 +12,8 @@ function Notifications() {
     if (!token) return;
 
     try {
-      const res = await fetch("https://crm-backend-production-eec9.up.railway.app/api/notifications/today", {
+      const res = await fetch(
+  `${process.env.REACT_APP_API}/api/notifications/today`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

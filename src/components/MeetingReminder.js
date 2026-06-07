@@ -1,14 +1,42 @@
 import React, {
   useEffect,
-  useState
+  useState,
+  useRef
 } from "react";
-
 import API from "../api/api";
 
 function MeetingReminder() {
 
   const [meetings, setMeetings] =
     useState([]);
+const notifiedMeetings =
+  useRef(new Set());
+  // ================= FETCH =================
+
+  const fetchMeetings =
+    async () => {
+
+      try {
+
+        const res =
+          await API.get("/meetings");
+
+        setMeetings(
+          res.data?.meetings || []
+        );
+
+      } catch (err) {
+
+        console.log(
+          "Meeting Fetch Error:",
+          err
+        );
+
+      }
+
+    };
+
+  // ================= INITIAL LOAD =================
 
   useEffect(() => {
 
@@ -18,78 +46,87 @@ function MeetingReminder() {
       setInterval(() => {
 
         fetchMeetings();
-        checkReminder();
 
       }, 60000);
 
     return () =>
       clearInterval(interval);
 
-  }, [meetings]);
-
-  // ================= FETCH =================
-
-  const fetchMeetings =
-    async () => {
-
-    try {
-
-      const res =
-        await API.get("/meetings");
-
-      setMeetings(
-        res.data.meetings || []
-      );
-
-    } catch (err) {
-
-      console.log(err);
-
-    }
-
-  };
+  }, []);
 
   // ================= REMINDER =================
 
-  const checkReminder =
-    () => {
+  // ================= REMINDER =================
 
-    const now =
-      new Date();
+const checkReminder = () => {
 
-    meetings.forEach((m) => {
+  const now = new Date();
 
-      const meetingTime =
-        new Date(
-          `${m.date} ${m.time}`
-        );
+  meetings.forEach((m) => {
 
-      const diff =
-        meetingTime - now;
+    const meetingTime =
+      new Date(m.start);
 
-      const minutes =
-        Math.floor(
-          diff / 1000 / 60
-        );
+    const diff =
+      meetingTime - now;
 
-      if (
-        minutes <= 30 &&
-        minutes > 0
-      ) {
+    const minutes =
+      Math.floor(
+        diff / 1000 / 60
+      );
 
-        alert(
-          `⏰ Upcoming Meeting: ${m.title}`
-        );
+    if (
+      minutes > 0 &&
+      minutes <= 30 &&
+      !notifiedMeetings.current.has(m._id)
+    ) {
 
-        window.dispatchEvent(
-          new Event("crm-notification")
-        );
+      notifiedMeetings.current.add(m._id);
 
-      }
+      alert(
+        `⏰ Upcoming Meeting: ${m.title}`
+      );
 
-    });
+      window.dispatchEvent(
+        new CustomEvent(
+          "crm-popup",
+          {
+            detail:
+              `Upcoming Meeting: ${m.title}`
+          }
+        )
+      );
 
-  };
+    }
+
+  });
+
+};
+
+// ================= RUN REMINDER =================
+
+useEffect(() => {
+
+  if (meetings.length > 0) {
+
+    checkReminder();
+
+  }
+
+}, [meetings]);
+  // ================= RUN REMINDER =================
+
+  useEffect(() => {
+
+    if (
+      meetings.length > 0
+    ) {
+
+      checkReminder();
+
+    }
+
+  }, [meetings]);
 
   return null;
 
