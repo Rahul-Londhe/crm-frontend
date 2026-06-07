@@ -11,39 +11,54 @@ function FollowUpAlert({ onClose }) {
     return t && t !== "undefined" && t !== "null" ? t : null;
   };
 
-  const loadFollowUps = async () => {
-    try {
-      const token = getToken();
-      if (!token) return;
+const loadFollowUps = async () => {
 
-      const res = await fetch(`${API}/followups`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+  try {
 
-      // ✅ FIX: handle 401
-      if (res.status === 401) {
-        console.log("Unauthorized - login again");
-        return;
-      }
+    const token = getToken();
 
-      if (!res.ok) {
-        console.log("API Error:", res.status);
-        return;
-      }
-
-      const data = await res.json();
-
-      if (data.success) {
-        setLeads(Array.isArray(data.leads) ? data.leads : []);
-      }
-
-    } catch (err) {
-      console.log("FollowUp Error:", err.message);
+    if (!token) {
+      console.log("No Token");
+      return;
     }
-  };
 
+    const res = await API.get(
+  "/followups/today",
+  {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+);
+
+    console.log(
+      "FOLLOWUP RESPONSE:",
+      res.data
+    );
+
+    if (res.data.success) {
+
+      setLeads(
+        Array.isArray(
+          res.data.leads
+        )
+          ? res.data.leads
+          : []
+      );
+
+    }
+
+  } catch (err) {
+
+    console.log(
+      "FOLLOWUP ERROR:",
+      err.response?.data ||
+      err.message
+    );
+
+  }
+
+};
   useEffect(() => {
     loadFollowUps();
   }, []);
