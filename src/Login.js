@@ -43,7 +43,13 @@ function Login({ setUser, setToken }) {
     password: password.trim(),
   }
 );
-
+console.log(
+  "Sending Login:",
+  {
+    email,
+    password
+  }
+);
 const data = res.data;
 
       console.log("LOGIN RESPONSE:", data);

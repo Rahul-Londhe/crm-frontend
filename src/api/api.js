@@ -47,10 +47,14 @@ API.interceptors.response.use(
   (err) => {
 
     console.error(
-      "API ERROR:",
-      err?.response?.data || err.message
-    );
+  "STATUS:",
+  err?.response?.status
+);
 
+console.error(
+  "ERROR DATA:",
+  err?.response?.data
+);
     if (err?.response?.status === 401) {
 
       localStorage.clear();
