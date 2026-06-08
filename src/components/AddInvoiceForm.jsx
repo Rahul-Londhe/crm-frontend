@@ -72,7 +72,10 @@ fetchLeads();
   try {
     setLoading(true);
     setError("");
-
+console.log(
+  "ALL FORM DATA:",
+  form
+);
     const payload = {
       invoiceNumber: form.invoiceNumber,
       lead: form.lead, // ✅ MongoDB ID only
@@ -139,7 +142,11 @@ const data = res.data;
         <select
   value={form.lead}
   onChange={(e) => {
-    console.log("SELECTED LEAD ID:", e.target.value);
+    console.log(
+  "SELECTED LEAD ID:",
+  e.target.value,
+  typeof e.target.value
+);
 
     setForm((prev) => ({
       ...prev,
