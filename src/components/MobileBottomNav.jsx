@@ -11,6 +11,19 @@ export default function MobileBottomNav({
   setPage,
   currentPage
 }) {
+  const user =
+  JSON.parse(
+    localStorage.getItem("user") || "{}"
+  );
+
+const isAdmin =
+  user?.role === "admin";
+
+const isHR =
+  user?.role === "hr";
+
+const isEmployee =
+  user?.role === "employee";
 
   // ================= ACTIVE STYLE =================
 
@@ -65,7 +78,7 @@ export default function MobileBottomNav({
       flex
       justify-around
       items-center
-      py-2
+   py-3
       md:hidden
       z-50
       shadow-[0_-2px_20px_rgba(0,0,0,0.08)]
@@ -120,18 +133,27 @@ export default function MobileBottomNav({
 
       {/* INVOICES */}
 
-      <button
-        onClick={() => setPage("invoices")}
-        style={btnStyle("invoices")}
-      >
+      {(isAdmin || isHR) ? (
 
-        <FiDollarSign size={24} />
+<button
+  onClick={() => setPage("invoices")}
+  style={btnStyle("invoices")}
+>
+  <FiDollarSign size={24} />
+  <span>Bills</span>
+</button>
 
-        <span>
-          Bills
-        </span>
+) : (
 
-      </button>
+<button
+  onClick={() => setPage("attendance")}
+  style={btnStyle("attendance")}
+>
+  <FiCheckSquare size={24} />
+  <span>Attendance</span>
+</button>
+
+)}
 
     </div>
 

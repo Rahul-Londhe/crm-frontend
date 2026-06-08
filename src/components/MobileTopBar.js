@@ -17,7 +17,7 @@ export default function MobileTopBar({
       top-0
       left-0
       right-0
-      h-[65px]
+   h-[60px]
       bg-white
       border-b
       flex
@@ -63,7 +63,9 @@ export default function MobileTopBar({
       justify-center
       font-bold
       ">
-        {user?.name?.charAt(0) || "U"}
+        {user?.name
+  ? user.name.charAt(0).toUpperCase()
+  : "U"}
       </div>
 
     </div>

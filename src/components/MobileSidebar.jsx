@@ -7,16 +7,30 @@ import {
   FiBarChart2,
   FiSettings,
   FiX,
-  FiDollarSign
+  FiDollarSign,
+  FiCalendar,
+  FiActivity,
+  FiBriefcase
 } from "react-icons/fi";
-
 export default function MobileSidebar({
   open,
   setOpen,
   setPage,
   currentPage
 }) {
+const user =
+  JSON.parse(
+    localStorage.getItem("user") || "{}"
+  );
 
+const isAdmin =
+  user?.role === "admin";
+
+const isHR =
+  user?.role === "hr";
+
+const isEmployee =
+  user?.role === "employee";
   const menuStyle = (page) => ({
 
     background:
@@ -104,7 +118,7 @@ export default function MobileSidebar({
         top-0
         left-0
         h-full
-        w-[280px]
+     w-[250px]
         bg-white
         shadow-2xl
         z-50
@@ -167,7 +181,17 @@ export default function MobileSidebar({
             label="Leads"
             page="leads"
           />
+<MenuButton
+  icon={<FiCalendar size={22} />}
+  label="Meetings"
+  page="meeting-calendar"
+/>
 
+<MenuButton
+  icon={<FiActivity size={22} />}
+  label="Activity"
+  page="activity"
+/>
           <MenuButton
             icon={<FiCheckSquare size={22} />}
             label="Tasks"
@@ -185,7 +209,40 @@ export default function MobileSidebar({
             label="Invoices"
             page="invoices"
           />
+{(isAdmin || isHR) && (
+  <MenuButton
+    icon={<FiBriefcase size={22} />}
+    label="Employees"
+    page="employees"
+  />
+)}
 
+<MenuButton
+  icon={<FiCalendar size={22} />}
+  label="Attendance"
+  page="attendance"
+/>
+
+<MenuButton
+  icon={<FiCheckSquare size={22} />}
+  label="Leave"
+  page="leave"
+/>
+{(isAdmin || isHR) && (
+  <MenuButton
+    icon={<FiBarChart2 size={22} />}
+    label="Performance"
+    page="performance"
+  />
+)}
+
+{(isAdmin || isHR) && (
+  <MenuButton
+    icon={<FiBriefcase size={22} />}
+    label="HR Dashboard"
+    page="hr"
+  />
+)}
           <MenuButton
             icon={<FiSettings size={22} />}
             label="Settings"

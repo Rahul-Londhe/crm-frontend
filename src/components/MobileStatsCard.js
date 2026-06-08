@@ -1,33 +1,28 @@
 import React from "react";
 
-export default function MobileStatsCard({
-  title,
-  value,
-  color = "blue"
-}) {
+const colors = {
+  blue: "#2563eb",
+  green: "#16a34a",
+  red: "#dc2626",
+  orange: "#f59e0b"
+};
 
-  return (
+return (
 
-    <div
-      className={`
-      rounded-3xl
-      p-4
-      text-white
-      shadow-lg
-      bg-${color}-600
-      `}
-    >
+  <div
+    style={{
+      background:
+        colors[color] || "#2563eb",
+      borderRadius: "20px",
+      padding: "15px",
+      color: "#fff"
+    }}
+  >
 
-      <h3 className="text-sm opacity-80">
-        {title}
-      </h3>
+    <h3>{title}</h3>
 
-      <h1 className="text-3xl font-bold mt-2">
-        {value}
-      </h1>
+    <h1>{value}</h1>
 
-    </div>
+  </div>
 
-  );
-
-}
+);

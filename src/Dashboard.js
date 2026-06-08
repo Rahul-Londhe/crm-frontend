@@ -16,7 +16,6 @@ import {
 import API from "./api/api"; // ✅ USE GLOBAL API
 
 import {
-  Doughnut,
   Bar,
   Line
 } from "react-chartjs-2";
@@ -289,16 +288,18 @@ const chartOptions = {
   return (
   <div className="
     min-h-screen
-    bg-slate-100
-    px-3 py-4 md:p-6
+bg-slate-100
+px-2
+py-2
+md:p-6
   ">
       <div className="
 flex
 flex-col
-xl:flex-row
-xl:items-center
-xl:justify-between
-gap-4
+lg:flex-row
+lg:items-center
+lg:justify-between
+gap-3
 mb-6
 ">
 <div className="
@@ -324,9 +325,12 @@ lg:w-[350px]
 </div>
   <div>
     <h1 className="
-text-2xl md:text-3xl
+text-2xl
+md:text-3xl
 font-bold
+mt-3
 text-slate-800
+break-words
 ">
       🚀 AI CRM Dashboard
     </h1>
@@ -340,6 +344,7 @@ mt-2
   </div>
 
   <div className="
+hidden md:block
 bg-red-600
 text-white
 px-5
@@ -375,6 +380,8 @@ bg-white
   onClick={loadData}
 
   className="
+w-full
+md:w-auto
 bg-blue-600
 hover:bg-blue-700
 text-white
@@ -385,7 +392,6 @@ transition
 shadow-lg
 font-semibold
 "
-
 >
 
   🔄 Refresh
@@ -433,11 +439,11 @@ mb-6
   />
 
   <Card
-    title="Revenue"
-    value={formatCurrency(stats.revenue)}
-    icon={<FiDollarSign />}
-    color="#dc2626"
-  />
+  title="Revenue"
+  value={formatCurrency(stats.revenue)}
+  icon={<FiDollarSign />}
+  color="#dc2626"
+/>
 
   <Card
     title="Conversion %"
@@ -474,7 +480,7 @@ mb-6
     border
     border-slate-200
     p-5
-    h-[320px] md:h-[400px]
+  h-[280px] md:h-[400px]
     overflow-hidden
     "
   >
@@ -506,7 +512,7 @@ mb-6
     border
     border-slate-200
     p-5
-    h-[400px]
+  h-[280px] md:h-[400px]
     overflow-hidden
     "
   >
@@ -537,7 +543,7 @@ mb-6
     border
     border-slate-200
     p-5
-    h-[400px]
+    h-[280px] md:h-[400px]
     overflow-hidden
     "
   >
@@ -569,7 +575,7 @@ mb-6
     border
     border-slate-200
     p-5
-    h-[400px]
+    h-[280px] md:h-[400px]
     overflow-y-auto
     "
   >
@@ -685,11 +691,13 @@ function Card({
           </p>
 
           <h1 className="
-          text-3xl
-          font-bold
-          mt-3
-          text-slate-800
-          ">
+text-xl
+md:text-3xl
+font-bold
+mt-3
+text-slate-800
+break-all
+">
             {value}
           </h1>
 

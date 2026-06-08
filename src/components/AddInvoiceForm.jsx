@@ -81,6 +81,15 @@ fetchLeads();
     };
 
     console.log("FINAL PAYLOAD:", payload);
+    console.log(
+  "LEAD TYPE:",
+  typeof payload.lead
+);
+
+console.log(
+  "LEAD VALUE:",
+  payload.lead
+);
 
     const res = await API.post("/invoices", payload);
 

@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, {
+  useState,
+  useEffect
+} from "react";
 import { FaChartPie }
 from "react-icons/fa";
 import {
@@ -22,6 +25,27 @@ import {
 
 
 function TopNavbar({ setPage, currentPage }) {
+  const [isMobile, setIsMobile] =
+  useState(window.innerWidth < 768);
+
+useEffect(() => {
+
+  const handleResize = () => {
+    setIsMobile(window.innerWidth < 768);
+  };
+
+  window.addEventListener(
+    "resize",
+    handleResize
+  );
+
+  return () =>
+    window.removeEventListener(
+      "resize",
+      handleResize
+    );
+
+}, []);
 
   const [active, setActive] =
     useState(currentPage || "dashboard");
@@ -85,7 +109,7 @@ function TopNavbar({ setPage, currentPage }) {
     window.location.reload();
 
   };
-
+if (isMobile) return null;
   return (
 
     <div style={styles.navbar}>
@@ -104,7 +128,10 @@ function TopNavbar({ setPage, currentPage }) {
 
   {/* ================= ADMIN MENU ================= */}
 
-  {user?.role === "admin" && (
+  {(
+  user?.role === "admin" ||
+  user?.role === "hr"
+) && (
 
     <>
 

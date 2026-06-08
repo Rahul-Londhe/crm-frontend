@@ -49,9 +49,6 @@ import NotificationSound
 from "./NotificationSound";
 import LiveNotification
 from "./components/LiveNotification";
-import MobileBottomNav from "./components/MobileBottomNav";
-import MobileTopBar from "./components/MobileTopBar";
-import MobileSidebar from "./components/MobileSidebar";
 import PWAInstallButton from "./components/PWAInstallButton";
 import NotificationBell from "./components/NotificationBell";
 
@@ -67,7 +64,7 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   const [page, setPage] = useState("dashboard");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+ 
   // ================= ROLE HELPERS =================
 
 const isAdmin = user?.role === "admin";
@@ -387,20 +384,7 @@ case "activity":
 <NotificationSound />
 <PWAInstallButton />
 <NotificationBell />
-<MobileSidebar
-  open={sidebarOpen}
-  setOpen={setSidebarOpen}
-  setPage={setPage}
-  currentPage={page}
-/>
-<MobileBottomNav
-  setPage={setPage}
-  currentPage={page}
-/>
-<MobileTopBar
-  user={user}
-  setSidebarOpen={setSidebarOpen}
-/>
+
       <div
   style={styles.container}
   className="

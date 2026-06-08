@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import TopNavbar from "./TopNavbar";
+import MobileTopBar from "./MobileTopBar";
+import MobileSidebar from "./MobileSidebar";
+import MobileBottomNav from "./MobileBottomNav";
 
 function Layout({
   children,
@@ -7,9 +10,34 @@ function Layout({
   currentPage,
   user
 }) {
+const [isMobile, setIsMobile] = useState(
+  window.innerWidth < 768
+);
 
-  const [collapsed, setCollapsed] =
-    useState(false);
+const [collapsed, setCollapsed] =
+  useState(false);
+
+const [sidebarOpen, setSidebarOpen] =
+  useState(false);
+
+useEffect(() => {
+
+  const handleResize = () => {
+    setIsMobile(window.innerWidth < 768);
+  };
+
+  window.addEventListener(
+    "resize",
+    handleResize
+  );
+
+  return () =>
+    window.removeEventListener(
+      "resize",
+      handleResize
+    );
+
+}, []);
 const isAdmin =
   user?.role === "admin";
 
@@ -56,26 +84,49 @@ const isEmployee =
 
     <div style={styles.container}>
 
+      {isMobile && (
+
+<>
+  <MobileTopBar
+    user={user}
+    setSidebarOpen={setSidebarOpen}
+  />
+
+  <MobileSidebar
+    open={sidebarOpen}
+    setOpen={setSidebarOpen}
+    setPage={setPage}
+    currentPage={currentPage}
+  />
+
+  <MobileBottomNav
+    setPage={setPage}
+    currentPage={currentPage}
+  />
+</>
+
+)}
+
       {/* ================= TOP NAVBAR ================= */}
 
-      <TopNavbar
-        setPage={setPage}
-        currentPage={currentPage}
-      />
+      {!isMobile && (
+<TopNavbar
+  setPage={setPage}
+  currentPage={currentPage}
+/>
+
+)}
 
       <div style={styles.body}>
 
         {/* ================= SIDEBAR ================= */}
 
         <div
-  className="hidden md:flex"
   style={{
-    ...styles.sidebar,
-            width:
-              collapsed
-                ? "90px"
-                : "240px"
-          }}
+  ...styles.sidebar,
+  display: isMobile ? "none" : "flex",
+  width: collapsed ? "90px" : "240px",
+}}
         >
 
           {/* COLLAPSE BUTTON */}
@@ -292,17 +343,17 @@ const isEmployee =
         {/* ================= MAIN CONTENT ================= */}
 
         <div
-          style={{
-            ...styles.main,
-            marginLeft:
-  window.innerWidth < 768
-    ? "0px"
-    : collapsed
-    ? "90px"
-    : "240px"
-          }}
-        >
+  style={{
+    ...styles.main,
+    marginLeft: !isMobile
+  ? (collapsed ? "90px" : "240px")
+  : "0px",
 
+width: !isMobile
+  ? `calc(100% - ${collapsed ? "90px" : "240px"})`
+  : "100%"
+  }}
+>
           {children}
 
         </div>
@@ -432,10 +483,7 @@ sectionTitle: {
 
   flex: 1,
 
-  padding:
-    window.innerWidth < 768
-      ? "10px"
-      : "15px",
+  padding: "15px",
 
   transition: "0.3s"
 
