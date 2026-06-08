@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import TopNavbar from "./TopNavbar";
-import MobileTopBar from "./MobileTopBar";
-import MobileSidebar from "./MobileSidebar";
-import MobileBottomNav from "./MobileBottomNav";
-
+import MobileTopBar from "./components/MobileTopBar";
+import MobileSidebar from "./components/MobileSidebar";
+import MobileBottomNav from "./components/MobileBottomNav";
 function Layout({
   children,
   setPage,
