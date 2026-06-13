@@ -4,12 +4,15 @@ import axios from "axios";
 // ================= BASE API =================
 const API = axios.create({
   baseURL:
-    process.env.REACT_APP_API ||
-    "http://localhost:5000/api",
+process.env.REACT_APP_API_URL ||
+"http://localhost:5000/api",
 
   timeout: 15000,
 });
-
+console.log(
+"INVOICE API URL:",
+process.env.REACT_APP_API_URL
+);
 // ================= TOKEN =================
 API.interceptors.request.use(
   (req) => {

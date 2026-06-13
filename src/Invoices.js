@@ -113,44 +113,50 @@ function Invoices() {
     }
   };
 
-  // ================= PDF =================
+  
   // ================= PDF =================
 const downloadPDF = async (id) => {
   try {
-    const token = localStorage.getItem("token");
-
-    if (!id) {
-      alert("Invalid invoice ID");
-      return;
-    }
 
     const res = await API.get(
-      `${API_URL}/invoices/${id}/pdf`,
+`/invoices/${id}/pdf`,
+{
+responseType: "blob"
+}
+);
+
+    const blob = new Blob(
+      [res.data],
       {
-        responseType: "blob",
-        headers: {
-          Authorization: `Bearer ${token}` // ✅ TOKEN FIX
-        }
+        type: "application/pdf"
       }
     );
 
-    // ✅ DOWNLOAD FILE
-    const blob = new Blob([res.data], { type: "application/pdf" });
-    const url = window.URL.createObjectURL(blob);
+    const url =
+      window.URL.createObjectURL(blob);
 
-    const link = document.createElement("a");
+    const link =
+      document.createElement("a");
+
     link.href = url;
-    link.download = `invoice_${id}.pdf`;
+
+    link.download =
+      `invoice_${id}.pdf`;
 
     document.body.appendChild(link);
+
     link.click();
 
-    document.body.removeChild(link);
+    link.remove();
+
     window.URL.revokeObjectURL(url);
 
   } catch (err) {
-    console.error("PDF Error:", err);
-    alert("PDF download failed");
+
+    console.log(err);
+
+    alert("PDF Download Failed");
+
   }
 };
 
