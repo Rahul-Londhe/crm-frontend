@@ -32,7 +32,10 @@ try {
   const data = res.data;
 
   console.log("FULL LEADS DATA:", data);
-
+console.log(
+  "FIRST LEAD:",
+  data.leads?.[0]
+);
   if (data && Array.isArray(data.leads)) {
     setLeads(data.leads);
 
@@ -43,7 +46,7 @@ try {
     setLeads([]);
   }
 
-} catch (err) {
+} catch (err) {z
 
   console.error("Lead Fetch Error:", err);
 
@@ -143,19 +146,21 @@ const data = res.data;
   value={form.lead}
   onChange={(e) => {
 
-    const selectedId = e.target.value;
+  const selectedLead = JSON.parse(e.target.value);
 
-    console.log(
-      "SELECTED MONGO ID:",
-      selectedId
-    );
+  console.log(
+    "FULL SELECTED LEAD:",
+    selectedLead
+  );
 
-    setForm((prev) => ({
-      ...prev,
-      lead: selectedId
-    }));
+  setForm((prev) => ({
+    ...prev,
+    lead:
+      selectedLead._id ||
+      selectedLead.id
+  }));
 
-  }}
+}}
   style={styles.input}
 >
   <option value="">Select Lead</option>
@@ -167,12 +172,12 @@ const data = res.data;
       l._id,
       l.name
     );
-
+console.log("FULL LEAD:", l);
     return (
       <option
-        key={l._id}
-        value={l._id}
-      >
+  key={l._id || l.id}
+  value={JSON.stringify(l)}
+>
         {l.name} ({l.phone})
       </option>
     );
