@@ -96,6 +96,9 @@ const register = async () => {
     const payload = {
   name: form.name,
   email: form.email,
+
+  username: form.email, // ADD THIS
+
   password: form.password,
   phone: form.phone,
   companyName: form.companyName,

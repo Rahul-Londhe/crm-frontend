@@ -139,29 +139,45 @@ const data = res.data;
         />
 
         {/* ✅ FIXED DROPDOWN */}
-        <select
+  <select
   value={form.lead}
   onChange={(e) => {
+
+    const selectedId = e.target.value;
+
     console.log(
-  "SELECTED LEAD ID:",
-  e.target.value,
-  typeof e.target.value
-);
+      "SELECTED MONGO ID:",
+      selectedId
+    );
 
     setForm((prev) => ({
       ...prev,
-      lead: e.target.value
+      lead: selectedId
     }));
+
   }}
   style={styles.input}
 >
   <option value="">Select Lead</option>
 
-  {leads.map((l) => (
-    <option key={l._id} value={l._id}>
-      {l.name} ({l.phone})
-    </option>
-  ))}
+  {leads.map((l) => {
+
+    console.log(
+      "LEAD OPTION:",
+      l._id,
+      l.name
+    );
+
+    return (
+      <option
+        key={l._id}
+        value={l._id}
+      >
+        {l.name} ({l.phone})
+      </option>
+    );
+
+  })}
 </select>
 
         {/* Amount */}
