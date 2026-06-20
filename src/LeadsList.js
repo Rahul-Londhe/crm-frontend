@@ -208,60 +208,34 @@ window.dispatchEvent(
 
 };
   // ================= ACTIONS =================
-  const sendWhatsApp = async (lead) => {
+  const sendWhatsApp = (lead) => {
 
   if (!lead?.phone) {
-    alert("No phone number");
+    alert("No phone number found");
     return;
   }
 
-  try {
+  let phone = lead.phone.toString().replace(/\D/g, "");
 
-    const res = await API.post(
-      "/whatsapp/send-message",
-      {
-        phone: lead.phone,
-        message: "Hello from CRM"
-      }
-    );
-
-    const data = res.data;
-
-    if (data.success) {
-
-      alert("✅ WhatsApp Sent");
-
-      window.dispatchEvent(
-        new Event("crm-notification")
-      );
-
-      window.dispatchEvent(
-        new CustomEvent(
-          "crm-popup",
-          {
-            detail:
-              "WhatsApp Sent Successfully"
-          }
-        )
-      );
-
-    } else {
-
-      alert(
-        "❌ Failed to send WhatsApp"
-      );
-
-    }
-
-  } catch (err) {
-
-    console.error(err);
-
-    alert(
-      "❌ Error sending WhatsApp"
-    );
-
+  if (phone.length === 10) {
+    phone = "91" + phone;
   }
+
+  const message =
+    `Hello ${lead.name},
+
+Thank you for your interest.
+
+Regards,
+CRM Team`;
+
+  const whatsappUrl =
+    `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+  window.open(
+    whatsappUrl,
+    "_blank"
+  );
 
 };
   const sendEmail = async (lead) => {

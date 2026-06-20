@@ -4,15 +4,30 @@ import API from "../api/api";
 function SettingsPage() {
 
   const [settings, setSettings] = useState({
-    companyName: "",
-    companyEmail: "",
-    companyPhone: "",
-    whatsappNumber: "",
-    smtpEmail: "",
-    smtpPassword: "",
-    whatsappAuto: true,
-    emailAuto: false
-  });
+  companyName: "",
+  companyEmail: "",
+  companyPhone: "",
+  whatsappNumber: "",
+  smtpEmail: "",
+  smtpPassword: "",
+
+  whatsappAuto: true,
+  emailAuto: false,
+
+  autoFollowupEnabled: true,
+
+  hotLeadWhatsappTemplate:
+    "Hi {{name}}, thank you for your interest. Our team will contact you shortly.",
+
+  warmLeadWhatsappTemplate:
+    "Hi {{name}}, thank you for connecting with us.",
+
+  coldLeadEmailSubject:
+    "Thank You For Your Interest",
+
+  coldLeadEmailTemplate:
+    "Hi {{name}}, Thank you for contacting us."
+});
 
   useEffect(() => {
     fetchSettings();
@@ -49,8 +64,23 @@ function SettingsPage() {
           whatsappAuto:
             res.data.settings.whatsappAuto ?? true,
 
+
           emailAuto:
-            res.data.settings.emailAuto ?? false
+            res.data.settings.emailAuto ?? false,
+            autoFollowupEnabled:
+res.data.settings.autoFollowupEnabled ?? true,
+
+hotLeadWhatsappTemplate:
+res.data.settings.hotLeadWhatsappTemplate || "",
+
+warmLeadWhatsappTemplate:
+res.data.settings.warmLeadWhatsappTemplate || "",
+
+coldLeadEmailSubject:
+res.data.settings.coldLeadEmailSubject || "",
+
+coldLeadEmailTemplate:
+res.data.settings.coldLeadEmailTemplate || ""
         });
 
       }
@@ -250,19 +280,93 @@ function SettingsPage() {
 
       </div>
 
-      <button
+      
+<div style={styles.checkboxRow}>
+<label>
+
+<input
+type="checkbox"
+checked={settings.autoFollowupEnabled}
+onChange={(e)=>
+setSettings({
+...settings,
+autoFollowupEnabled:e.target.checked
+})
+}
+/>
+
+{" "}Auto Followup
+
+</label>
+</div>
+
+<textarea
+placeholder="Hot Lead WhatsApp Template"
+value={settings.hotLeadWhatsappTemplate}
+onChange={(e)=>
+setSettings({
+...settings,
+hotLeadWhatsappTemplate:e.target.value
+})
+}
+style={{
+...styles.input,
+height:"120px"
+}}
+/>
+
+<textarea
+placeholder="Warm Lead WhatsApp Template"
+value={settings.warmLeadWhatsappTemplate}
+onChange={(e)=>
+setSettings({
+...settings,
+warmLeadWhatsappTemplate:e.target.value
+})
+}
+style={{
+...styles.input,
+height:"120px"
+}}
+/>
+
+<input
+type="text"
+placeholder="Cold Lead Email Subject"
+value={settings.coldLeadEmailSubject}
+onChange={(e)=>
+setSettings({
+...settings,
+coldLeadEmailSubject:e.target.value
+})
+}
+style={styles.input}
+/>
+
+<textarea
+placeholder="Cold Lead Email Template"
+value={settings.coldLeadEmailTemplate}
+onChange={(e)=>
+setSettings({
+...settings,
+coldLeadEmailTemplate:e.target.value
+})
+}
+style={{
+...styles.input,
+height:"120px"
+}}
+/>
+<button
         onClick={saveSettings}
         style={styles.button}
       >
         Save Settings
       </button>
-
     </div>
 
   );
-
 }
-
 const styles = {
 
   input: {
