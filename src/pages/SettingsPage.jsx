@@ -17,16 +17,40 @@ function SettingsPage() {
   autoFollowupEnabled: true,
 
   hotLeadWhatsappTemplate:
-    "Hi {{name}}, thank you for your interest. Our team will contact you shortly.",
+`Hello {{name}},
+
+Thank you for contacting {{company}}.
+
+Owner Contact : {{phone}}
+Email : {{email}}
+
+Regards,
+{{company}}`,
 
   warmLeadWhatsappTemplate:
-    "Hi {{name}}, thank you for connecting with us.",
+`Hello {{name}},
+
+Thank you for your enquiry.
+
+Owner Contact : {{phone}}
+Email : {{email}}
+
+Regards,
+{{company}}`,
 
   coldLeadEmailSubject:
     "Thank You For Your Interest",
 
   coldLeadEmailTemplate:
-    "Hi {{name}}, Thank you for contacting us."
+`Hello {{name}},
+
+Thank you for contacting {{company}}.
+
+Owner Contact : {{phone}}
+Email : {{email}}
+
+Regards,
+{{company}}`
 });
 
   useEffect(() => {
